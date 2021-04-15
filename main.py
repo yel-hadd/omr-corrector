@@ -53,16 +53,19 @@ if biggestContour.size != 0 and gradePoints.size != 0:
     boxes = utils.splitBoxes(imgThresh, choices, questions)
 
     myPixelVal = np.zeros((questions, choices))
+    myZeroPixelVal = np.zeros((questions, choices))
     countC = 0
     countR = 0
     for image in boxes:
         totalPixel = cv2.countNonZero(image)
         myPixelVal[countR][countC] = totalPixel
+        myZeroPixelVal[countR][countC] = image.shape[0]* image.shape[1] - totalPixel
         countC += 1
         if countC == choices:
             countR += 1
             countC = 0
     print(myPixelVal)
+    print(myZeroPixelVal)
 
     # Finding index values of the markings
     myIndex = []
