@@ -16,12 +16,12 @@ imgFinal = img.copy()
 imgContours = img.copy()
 imgBiggestContours = img.copy()
 ans = np.zeros((questions, choices))
-gradingType = 1 # 0==moderate 1==strict
+
 ans = [[1, 0, 0, 0, 0],  # 1
        [1, 0, 0, 1, 0],  # 2
        [1, 0, 0, 1, 0],  # 2
        [1, 1, 0, 0, 0],  # 2
-       [0, 1, 0, 1, 0],  # 1
+       [0, 1, 0, 0, 0],  # 1
        [1, 0, 0, 1, 0],  # 2
        [0, 0, 0, 1, 1],  # 2
        [0, 0, 0, 0, 1],  # 1
@@ -93,49 +93,48 @@ if biggestContour.size != 0 and gradePoints.size != 0:
         if countC == choices:
             countR += 1
             countC = 0
-    #print(myPixelVal)
-    # print(empty)
+
     # Getting the Sum of Each line values
     sumLineFull = np.sum(Full,axis=1)
     sumLineFull = sumLineFull.tolist()
     sumLineAns = np.sum(ans,axis=1)
     sumLineAns = sumLineAns.tolist()
-    #print('sum line ans:', sumLineAns)
-    #print('sum line full:', sumLineFull)
+
     # Grading
     grading = []
-    grading = (ans == Full).all(axis=1)
-    print(type(grading))
-    grading = grading.tolist()
-    print('grading', grading)
-    score = []
-    for item in range(0, questions):
-        if grading[item] == True:
-            score.append(bareme[item])
-        else:
-            score.append(0)
+    score = [0] * questions
+    gradingType = 0  # 0==moderate 1==strict
+    # Strict Grading
+    if gradingType == 1:
+        grading = []
+        grading = (ans == Full).all(axis=1)
+        for item in range(questions):
+            if grading[item] == True:
+                score.append(bareme[item])
+            else:
+                score.append(0)
+        grading = grading.tolist()
+    # Moderate Grading
+    elif gradingType == 0:
+        grading = np.zeros((questions,choices))
+        for j in range(questions):
+            for i in range(choices):
+                if ans[j][i] == Full[j][i] and Full[j][i] == True and empty[j][i] == 0:
+                    grading[j][i] = bareme[j]/nbrChoices[j]
+                    score[j] += bareme[j]/nbrChoices[j]
+                else:
+                    grading[j][i] = 0
+                    score[j] += 0
+    print(grading)
+    sumGrading = np.sum(grading,axis=1)
+    sumGrading = sumGrading.tolist()
+    sumGrading = sum(sumGrading)
+    print(sum(score))
+
     print(sum(score))
     cv2.imwrite("you.png", imgWarpColored)
 
-"""
-    countC = 0
-    countR = 0
-    for image in boxes:
-        for line in range(0,questions):
-            if sumLineAns[countC] != sumLineFull[countC]:
-                #grading[all(countR)][countC] = 0
-            if ans[countR][countC] == Full[countR][countC]:
-                grading[countR][countC] = bareme[countC]/nbrChoices[countC]
-            elif ans[countR][countC] != Full[countR][countC]:
-                grading[countR][countC] = 0
-            countC =+ 1
-        if countC == choices:
-            countR += 1
-            countC = 0
-    print(grading)
-"""
 
-"""
     # Finding index values of the markings
     myIndex = []
     for x in range(0, questions):
@@ -143,23 +142,8 @@ if biggestContour.size != 0 and gradePoints.size != 0:
         myIndexVal = np.where(arr == np.amax(arr))
         myIndex.append(myIndexVal[0][0])
     print("myindex",myIndex)
-"""
 
 """
-    grading = []
-    for x in range(0, questions):
-        if ans[x] == myIndex[x] and empty[x] == 0:
-            grading.append(1)
-        else:
-            grading.append(0)
-    print(grading)
-    score = (sum(grading)/questions)*100
-    score = (score*questions)/100
-    print(score)
-    d = sum(grading)
-    print(sum(grading), '/', questions)
-    #print(imgThresh.shape)
-
     # DISPLAY ANSWERS
     imgResult = imgWarpColored.copy()
     imgResult = utils.showAnswers(imgResult, myIndex, grading, ans, questions, choices)
