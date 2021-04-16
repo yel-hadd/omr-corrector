@@ -104,7 +104,15 @@ if biggestContour.size != 0 and gradePoints.size != 0:
     countC = 0
     countR = 0
     grading = (ans == Full).all(axis=1)
-    print(grading)
+    grading = grading.tolist()
+    print(type(grading))
+    score = []
+    for item in range(0, questions):
+        if grading[item] == True:
+            score.append(bareme[item])
+        else:
+            score.append(0)
+    print(sum(score))
     cv2.imwrite("you.png", imgWarpColored)
 
 """
