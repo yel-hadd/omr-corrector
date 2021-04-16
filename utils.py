@@ -99,7 +99,7 @@ def showAnswers(img,myIndex,grading,ans,questions,choices):
         cX = int((myAns*sectionWidth) + sectionWidth/2)
         cY = int((x*sectionHeight) + sectionHeight/2)
 
-        if grading[x] == 1:
+        if grading[x] == True:
             myColor = (0, 255, 0)
         else:
             myColor = (0,0,255)

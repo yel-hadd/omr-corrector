@@ -4,17 +4,39 @@ import utils
 
 questions = 20
 choices = 5
-path = 'ms.png'
-widthImg = 566
-heightImg = 800
+bareme = [0.5, 1.5, 0.5, 1.5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.5, 1, 0.5]
+nbrChoices = [1, 2, 2, 2, 1, 2, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1]
+#print(sum(nbrChoices))
+path = '20.png'
 img = cv2.imread(path)
-#widthImg = img.shape[1]
-#heightImg = img.shape[0]
+widthImg = img.shape[1]
+heightImg = img.shape[0]
 img = cv2.resize(img, (widthImg, heightImg))
 imgFinal = img.copy()
 imgContours = img.copy()
 imgBiggestContours = img.copy()
-ans = [0, 4, 3, 1, 0, 3, 2, 4, 2, 2, 3, 1, 2, 1, 2, 1, 3, 4, 0, 0]
+ans = np.zeros((questions, choices))
+gradingType = 1 # 0==moderate 1==strict
+ans = [[1, 0, 0, 0, 0],  # 1
+       [1, 0, 0, 1, 0],  # 2
+       [1, 0, 0, 1, 0],  # 2
+       [1, 1, 0, 0, 0],  # 2
+       [0, 1, 0, 1, 0],  # 1
+       [1, 0, 0, 1, 0],  # 2
+       [0, 0, 0, 1, 1],  # 2
+       [0, 0, 0, 0, 1],  # 1
+       [0, 1, 0, 0, 0],  # 1
+       [0, 0, 1, 0, 0],  # 1
+       [1, 1, 0, 0, 0],  # 2
+       [0, 1, 0, 0, 0],  # 1
+       [1, 0, 0, 0, 0],  # 1
+       [0, 0, 0, 0, 1],  # 1
+       [0, 1, 0, 0, 1],  # 2
+       [0, 1, 0, 0, 0],  # 1
+       [1, 0, 0, 0, 0],  # 1
+       [0, 0, 0, 0, 1],  # 1
+       [0, 0, 0, 1, 0],  # 1
+       [1, 0, 0, 0, 0]]  # 1
 
 # image preprocessing
 imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -52,46 +74,78 @@ if biggestContour.size != 0 and gradePoints.size != 0:
     imgThresh = cv2.threshold(imgWarpGray, 200, 255, cv2.THRESH_BINARY_INV)[1]
     boxes = utils.splitBoxes(imgThresh, choices, questions)
 
+    # Count NonZeroPixels and Detect empty and full cells
     myPixelVal = np.zeros((questions, choices))
-    myZeroPixelVal = np.zeros((questions, choices))
+    empty = np.zeros((questions, choices))
+    Full = np.zeros((questions, choices))
     countC = 0
     countR = 0
     for image in boxes:
         totalPixel = cv2.countNonZero(image)
         myPixelVal[countR][countC] = totalPixel
-        myZeroPixelVal[countR][countC] = image.shape[0]* image.shape[1] - totalPixel
+        if myPixelVal[countR][countC] < image.shape[0] * image.shape[1] * 35 / 100:
+            empty[countR][countC] = 1
+            Full[countR][countC] = 0
+        else:
+            empty[countR][countC] = 0
+            Full[countR][countC] = 1
         countC += 1
         if countC == choices:
             countR += 1
             countC = 0
-    print(myPixelVal)
-    print(myZeroPixelVal)
+    # print(myPixelVal)
+    # print(empty)
+    # Getting the Sum of Each line values
+    sumLineFull = np.sum(Full,axis=1)
+    sumLineAns = np.sum(ans,axis=1)
 
+    # Grading
+    grading = []
+    countC = 0
+    countR = 0
+    grading = (ans == Full).all(axis=1)
+    print(grading)
+    cv2.imwrite("you.png", imgWarpColored)
+
+"""
+    for image in boxes:
+        for line in range(0,questions):
+            #if sumLineAns[countC] != sumLineFull[countC]:
+                #grading[all(countR)][countC] = 0
+            if ans[countR][countC] == Full[countR][countC]:
+                grading[countR][countC] = bareme[countC]/nbrChoices[countC]
+            elif ans[countR][countC] != Full[countR][countC]:
+                grading[countR][countC] = 0
+        if countC == choices:
+            countR += 1
+            countC = 0
+    print(grading)
+"""
+
+"""
     # Finding index values of the markings
     myIndex = []
     for x in range(0, questions):
         arr = myPixelVal[x]
-        # print(arr)
         myIndexVal = np.where(arr == np.amax(arr))
-        # print(myIndexVal[0])
         myIndex.append(myIndexVal[0][0])
-    print(myIndex)
+    print("myindex",myIndex)
+"""
 
-    # Grading
+"""
     grading = []
     for x in range(0, questions):
-        if ans[x] == myIndex[x]:
+        if ans[x] == myIndex[x] and empty[x] == 0:
             grading.append(1)
         else:
             grading.append(0)
-
     print(grading)
     score = (sum(grading)/questions)*100
     score = (score*questions)/100
     print(score)
     d = sum(grading)
-    print(d, '/', questions)
-    print(imgThresh.shape)
+    print(sum(grading), '/', questions)
+    #print(imgThresh.shape)
 
     # DISPLAY ANSWERS
     imgResult = imgWarpColored.copy()
@@ -113,3 +167,4 @@ if biggestContour.size != 0 and gradePoints.size != 0:
 
 
 cv2.waitKey(0)
+"""
