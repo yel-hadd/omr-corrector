@@ -93,19 +93,21 @@ if biggestContour.size != 0 and gradePoints.size != 0:
         if countC == choices:
             countR += 1
             countC = 0
-    # print(myPixelVal)
+    #print(myPixelVal)
     # print(empty)
     # Getting the Sum of Each line values
     sumLineFull = np.sum(Full,axis=1)
+    sumLineFull = sumLineFull.tolist()
     sumLineAns = np.sum(ans,axis=1)
-
+    sumLineAns = sumLineAns.tolist()
+    #print('sum line ans:', sumLineAns)
+    #print('sum line full:', sumLineFull)
     # Grading
     grading = []
-    countC = 0
-    countR = 0
     grading = (ans == Full).all(axis=1)
-    grading = grading.tolist()
     print(type(grading))
+    grading = grading.tolist()
+    print('grading', grading)
     score = []
     for item in range(0, questions):
         if grading[item] == True:
@@ -116,14 +118,17 @@ if biggestContour.size != 0 and gradePoints.size != 0:
     cv2.imwrite("you.png", imgWarpColored)
 
 """
+    countC = 0
+    countR = 0
     for image in boxes:
         for line in range(0,questions):
-            #if sumLineAns[countC] != sumLineFull[countC]:
+            if sumLineAns[countC] != sumLineFull[countC]:
                 #grading[all(countR)][countC] = 0
             if ans[countR][countC] == Full[countR][countC]:
                 grading[countR][countC] = bareme[countC]/nbrChoices[countC]
             elif ans[countR][countC] != Full[countR][countC]:
                 grading[countR][countC] = 0
+            countC =+ 1
         if countC == choices:
             countR += 1
             countC = 0
@@ -173,6 +178,6 @@ if biggestContour.size != 0 and gradePoints.size != 0:
     cv2.imshow('thresh', imgResult)
     print(imgResult.shape)
 
-
-cv2.waitKey(0)
 """
+cv2.waitKey(0)
+
