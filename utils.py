@@ -86,8 +86,8 @@ def splitBoxes(img,choices,questions):
         for box in cols:
             boxes.append(box)
             #cv2.imshow("box",box)
-    cv2.imshow("split rows",rows[1])
-    cv2.imshow("split cols",cols[3])
+    #cv2.imshow("split rows",rows[2])
+    #cv2.imshow("split cols",cols[0])
     #print(img.shape)
     return boxes
 
@@ -109,3 +109,22 @@ def showAnswers(img,myIndex,grading,ans,questions,choices):
         cv2.circle(img,(cX,cY),30,myColor,cv2.FILLED)
     return img
 
+def genPdf(questions,choices):
+    if choices == 5 and questions == 20:
+        img = cv2.imread('5x20.png')
+    elif choices == 5 and questions == 15:
+        img = cv2.imread('5x15.png')
+    elif choices == 5 and questions == 10:
+        img = cv2.imread('5x10.png')
+    elif choices == 4 and questions == 20:
+        img = cv2.imread('4x20.png')
+    elif choices == 4 and questions == 15:
+        img = cv2.imread('4x15.png')
+    elif choices == 4 and questions == 10:
+        img = cv2.imread('4x10.png')
+    elif choices == 3 and questions == 20:
+        img = cv2.imread('3x20.png')
+    elif choices == 3 and questions == 15:
+        img = cv2.imread('3x15.png')
+    elif choices == 3 and questions == 10:
+        img = cv2.imread('3x10.png')
