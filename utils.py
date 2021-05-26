@@ -1,43 +1,6 @@
 import cv2
 import numpy as np
 
-
-def stackImages(imgArray,scale,lables=[]):
-    rows = len(imgArray)
-    cols = len(imgArray[0])
-    rowsAvailable = isinstance(imgArray[0], list)
-    width = imgArray[0][0].shape[1]
-    height = imgArray[0][0].shape[0]
-    if rowsAvailable:
-        for x in range ( 0, rows):
-            for y in range(0, cols):
-                imgArray[x][y] = cv2.resize(imgArray[x][y], (0, 0), None, scale, scale)
-                if len(imgArray[x][y].shape) == 2: imgArray[x][y]= cv2.cvtColor( imgArray[x][y], cv2.COLOR_GRAY2BGR)
-        imageBlank = np.zeros((height, width, 3), np.uint8)
-        hor = [imageBlank]*rows
-        hor_con = [imageBlank]*rows
-        for x in range(0, rows):
-            hor[x] = np.hstack(imgArray[x])
-            hor_con[x] = np.concatenate(imgArray[x])
-        ver = np.vstack(hor)
-        ver_con = np.concatenate(hor)
-    else:
-        for x in range(0, rows):
-            imgArray[x] = cv2.resize(imgArray[x], (0, 0), None, scale, scale)
-            if len(imgArray[x].shape) == 2: imgArray[x] = cv2.cvtColor(imgArray[x], cv2.COLOR_GRAY2BGR)
-        hor= np.hstack(imgArray)
-        hor_con= np.concatenate(imgArray)
-        ver = hor
-    if len(lables) != 0:
-        eachImgWidth= int(ver.shape[1] / cols)
-        eachImgHeight = int(ver.shape[0] / rows)
-        #print(eachImgHeight)
-        for d in range(0, rows):
-            for c in range (0,cols):
-                cv2.rectangle(ver,(c*eachImgWidth,eachImgHeight*d),(c*eachImgWidth+len(lables[d])*13+27,30+eachImgHeight*d),(255,255,255),cv2.FILLED)
-                cv2.putText(ver,lables[d],(eachImgWidth*c+10,eachImgHeight*d+20),cv2.FONT_HERSHEY_COMPLEX,0.7,(255,0,255),2)
-    return ver
-
 # detect rectangle contour
 def rectContours(contours):
     rectCon = []
@@ -91,40 +54,6 @@ def splitBoxes(img,choices,questions):
     #print(img.shape)
     return boxes
 
-def showAnswers(img, myIndex, grading, ans, questions, choices):
-    sectionWidth = round_down(img.shape[1],questions)/choices
-    sectionHeight = round_down(img.shape[0],choices)/questions
-    for x in range(0,questions):
-        myAns = myIndex[x]
-        cX = int((myAns*sectionWidth) + sectionWidth/2)
-        cY = int((x*sectionHeight) + sectionHeight/2)
 
-        if grading[x] == True:
-            myColor = (0, 255, 0)
-        else:
-            myColor = (0,0,255)
-            correctAns = ans[x]
-            cv2.circle(img, (int((correctAns*sectionWidth)+sectionWidth/2),int((x*sectionHeight)+sectionHeight/2)),
-                       30, (0, 255, 0), cv2.FILLED)
-        cv2.circle(img,(cX,cY),30,myColor,cv2.FILLED)
-    return img
 
-def genPdf(questions, choices):
-    if choices == 5 and questions == 20:
-        img = cv2.imread('5x20.png')
-    elif choices == 5 and questions == 15:
-        img = cv2.imread('5x15.png')
-    elif choices == 5 and questions == 10:
-        img = cv2.imread('5x10.png')
-    elif choices == 4 and questions == 20:
-        img = cv2.imread('4x20.png')
-    elif choices == 4 and questions == 15:
-        img = cv2.imread('4x15.png')
-    elif choices == 4 and questions == 10:
-        img = cv2.imread('4x10.png')
-    elif choices == 3 and questions == 20:
-        img = cv2.imread('3x20.png')
-    elif choices == 3 and questions == 15:
-        img = cv2.imread('3x15.png')
-    elif choices == 3 and questions == 10:
-        img = cv2.imread('3x10.png')
+
