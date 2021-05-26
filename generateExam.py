@@ -33,7 +33,6 @@ def SwitchFrThreeChoices(argument):
     }
     return switcher.get(argument)
 
-
 def SwitchFrFourChoices(argument):
     switcher = {
         5: "./model/fr/5x4.png",
@@ -195,7 +194,6 @@ def merge(QR,sheet):
         sheet.paste(code, (918, 640))
         sheet.save(fileName)
     return sheetFileName
-
 
 def genPDF(sheetFileName):
     pdf = FPDF()
