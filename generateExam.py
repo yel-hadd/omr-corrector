@@ -1,5 +1,6 @@
 import qrcode as qr
 import os
+import glob
 from PIL import Image
 from fpdf import FPDF
 
@@ -9,8 +10,8 @@ lang = 'fr'
 students = ['YASSINE', 'DRIOUI', 'FACHA', 'BADIDA']
 exam = ['1st exam']
 classes = ['MIR', 'ESA']
-bareme = [0.5, 1.5, 0.5, 1.5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.5, 1, 0.5]
 r = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+
 
 def SwitchFrThreeChoices(argument):
     switcher = {
@@ -33,6 +34,7 @@ def SwitchFrThreeChoices(argument):
     }
     return switcher.get(argument)
 
+
 def SwitchFrFourChoices(argument):
     switcher = {
         5: "./model/fr/5x4.png",
@@ -53,6 +55,7 @@ def SwitchFrFourChoices(argument):
         20: "./model/fr/20x4.png",
     }
     return switcher.get(argument, "nothing")
+
 
 def SwitchFrFiveChoices(argument):
     switcher = {
@@ -75,6 +78,7 @@ def SwitchFrFiveChoices(argument):
     }
     return switcher.get(argument)
 
+
 def SwitchArThreeChoices(argument):
     switcher = {
         5: "./model/ar/ar5x3.png",
@@ -95,6 +99,7 @@ def SwitchArThreeChoices(argument):
         20: "./model/ar/ar20x3.png",
     }
     return switcher.get(argument)
+
 
 def SwitchArFourChoices(argument):
     switcher = {
@@ -117,6 +122,7 @@ def SwitchArFourChoices(argument):
     }
     return switcher.get(argument)
 
+
 def SwitchArFiveChoices(argument):
     switcher = {
         5: "./model/ar/ar5x5.png",
@@ -137,6 +143,7 @@ def SwitchArFiveChoices(argument):
         20: "./model/ar/ar20x5.png",
     }
     return switcher.get(argument)
+
 
 def loadAnswerSheet(questions, choices, lang):
     if lang == 'fr' or lang == 'en':
@@ -167,6 +174,7 @@ def loadAnswerSheet(questions, choices, lang):
                     sheet = SwitchArFiveChoices(x)
     return sheet
 
+
 def genQR(student, classes, exams):
     QR = []
     qrFilename = []
@@ -180,6 +188,7 @@ def genQR(student, classes, exams):
         QR.append(qrCode)
         QR[x].save(fileName)
     return qrFilename
+
 
 def merge(QR,sheet):
     sheet = Image.open(sheet)
@@ -195,6 +204,7 @@ def merge(QR,sheet):
         sheet.save(fileName)
     return sheetFileName
 
+
 def genPDF(sheetFileName):
     pdf = FPDF()
     pdf.set_auto_page_break(0)
@@ -208,12 +218,24 @@ def genPDF(sheetFileName):
         height = height if height < pdf_size[orientation]['h'] else pdf_size[orientation]['h']
         pdf.add_page(orientation=orientation)
         pdf.image(imageFile, 0, 0, width, height)
-    pdf.output("vvv.pdf", "F")
+    pdf.output("exam.pdf", "F")
 
-def generateExam(questions,choices,students,classe,exam, lang):
+
+def clean():
+    qrs = glob.glob('./qr/*')
+    sheets = glob.glob('./sh/*')
+    for f in qrs:
+        os.remove(f)
+    for f in sheets:
+        os.remove(f)
+
+
+def generateExam(questions, choices, students, classe, exam, lang):
     sheet = loadAnswerSheet(questions, choices, lang)
     QR = genQR(students, classe, exam[0])
     imagelist = merge(QR, sheet)
     genPDF(imagelist)
+    clean()
 
-generateExam(questions,choices,students,classes[0],exam[0], lang='fr')
+
+generateExam(questions, choices, students, classes[0], exam[0], lang='fr')
