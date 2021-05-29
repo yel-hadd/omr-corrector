@@ -48,10 +48,6 @@ def splitBoxes(img,choices,questions):
         cols = np.hsplit(r,choices)
         for box in cols:
             boxes.append(box)
-            #cv2.imshow("box",box)
-    #cv2.imshow("split rows",rows[2])
-    #cv2.imshow("split cols",cols[0])
-    #print(img.shape)
     return boxes
 
 

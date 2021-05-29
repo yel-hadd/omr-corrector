@@ -1,14 +1,11 @@
 import cv2
 import numpy as np
 import utils
-import os
 
 questions = 20
 choices = 5
-path = '5x20.png'
+path = './5.png'
 img = cv2.imread(path)
-widthImg = img.shape[1]
-heightImg = img.shape[0]
 imgFinal = img.copy()
 ans = np.zeros((questions, choices))
 
@@ -39,7 +36,9 @@ exam = ['1st exam']
 classes = ['MIR', 'ESA']
 bareme = [0.5, 1.5, 0.5, 1.5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.5, 1, 0.5]
 
-def correctExam(img,widthImg,heightImg,ans,questions,choices,bareme):
+def correctExam(img,ans,questions,choices,bareme):
+    widthImg = img.shape[1]
+    heightImg = img.shape[0]
     imgContours = img.copy()
     imgBiggestContours = img.copy()
     nbrChoices = np.sum(ans, axis=1)
@@ -122,7 +121,7 @@ def correctExam(img,widthImg,heightImg,ans,questions,choices,bareme):
         # Grading
         grading = []
         score = []
-        gradingType = 1  # 0==moderate 1==strict
+        gradingType = 0  # 0==moderate 1==strict
 
         # Strict Grading
         if gradingType == 1:
@@ -151,8 +150,11 @@ def correctExam(img,widthImg,heightImg,ans,questions,choices,bareme):
             #print(score)
             #print(sumScore)
         # print(sum(score))
-        cv2.imwrite("you.png", imgWarpColored)
+        #cv2.imwrite("you.png", imgWarpColored)
+    #print(sumScore, '/', sum(bareme))
+    #cv2.imwrite('x.png', imgThresh)
 
-    return score,sumScore,sum(bareme)
+    return sumScore
 
-#result = correctExam(img,widthImg,heightImg,ans,questions,choices,bareme)
+result = correctExam(img, ans, questions, choices, bareme)
+#print(result)

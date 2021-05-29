@@ -1,13 +1,12 @@
 import qrcode as qr
 import os
-import glob
 from PIL import Image
 from fpdf import FPDF
 
-questions = 10
-choices = 5
+questions = 15
+choices = 4
 lang = 'fr'
-students = ['YASSINE', 'DRIOUI', 'FACHA', 'BADIDA']
+students = ['YASSINE', 'YASSINE1', 'YASSINE2', 'YASSINE3']
 exam = ['1st exam']
 classes = ['MIR', 'ESA']
 r = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
@@ -221,21 +220,17 @@ def genPDF(sheetFileName):
     pdf.output("exam.pdf", "F")
 
 
-def clean():
-    qrs = glob.glob('./qr/*')
-    sheets = glob.glob('./sh/*')
-    for f in qrs:
+def clean(qr, sheet):
+    for f in qr:
         os.remove(f)
-    for f in sheets:
+    for f in sheet:
         os.remove(f)
-
 
 def generateExam(questions, choices, students, classe, exam, lang):
     sheet = loadAnswerSheet(questions, choices, lang)
     QR = genQR(students, classe, exam[0])
     imagelist = merge(QR, sheet)
     genPDF(imagelist)
-    clean()
-
+    clean(QR,imagelist)
 
 generateExam(questions, choices, students, classes[0], exam[0], lang='fr')
