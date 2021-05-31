@@ -157,4 +157,4 @@ def correctExam(img,ans,questions,choices,bareme):
     return sumScore
 
 result = correctExam(img, ans, questions, choices, bareme)
-#print(result)
+print(result)

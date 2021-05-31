@@ -226,6 +226,7 @@ def clean(qr, sheet):
     for f in sheet:
         os.remove(f)
 
+
 def generateExam(questions, choices, students, classe, exam, lang):
     sheet = loadAnswerSheet(questions, choices, lang)
     QR = genQR(students, classe, exam[0])
