@@ -2,13 +2,8 @@ import qrcode as qr
 import os
 from PIL import Image
 from fpdf import FPDF
+import openpyxl as opxl
 
-questions = 15
-choices = 4
-lang = 'fr'
-students = ['YASSINE', 'YASSINE1', 'YASSINE2', 'YASSINE3']
-exam = ['1st exam']
-classes = ['MIR', 'ESA']
 r = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
 
 
@@ -174,22 +169,58 @@ def loadAnswerSheet(questions, choices, lang):
     return sheet
 
 
-def genQR(student, classes, exams):
+def loadstdntinfo(workbook, number_of_students):
+    global academiex, _classx, levelx, subjectx, semesterx, sessionx, directionx
+    wb = opxl.load_workbook(f'{workbook}')
+    sh1 = wb['NotesCC']
+    names = []
+    massar_id = []
+
+    academie = sh1['D7'].value
+    academiex = f'أكاديمية: {academie}'
+    level = sh1['D9'].value
+    levelx = f'المستوى: {level}'
+    semester = sh1['D11'].value
+    semesterx = f'الدورة: {semester}'
+    session = sh1['D13'].value
+    sessionx = f'السنة الدراسية: {session}'
+    _class = sh1['I9'].value
+    _classx = f'القسم: {_class}'
+    direction = sh1['I7'].value
+    directionx = f'م.الإقليمية: {direction}'
+    subject = sh1['O11'].value
+    subjectx = f'المادة: {subject}'
+
+    names_column = sh1['D18':f'D{18+number_of_students}']
+    for cell in names_column:
+        for x in cell:
+            names.append(x.value)
+
+    massar_column = sh1['C18':f'C{18+number_of_students}']
+    for cell in massar_column:
+        for x in cell:
+            massar_id.append(x.value)
+    print(names)
+    print(massar_id)
+    return names, massar_id, _class
+
+
+def genQR(exam_id, questions, choices, names, massar_id, _class):
     QR = []
     qrFilename = []
-    for x in range(0,len(student)):
+    for x in len(names):
         i = 1
         while os.path.exists("./qr/code%s.png" % i):
             i += 1
         fileName = ("./qr/code%s.png" % i)
         qrFilename.append(fileName)
-        qrCode = qr.make((student[x], classes, exams))
+        qrCode = qr.make((exam_id, questions, choices, names[x], massar_id[x], _class))
         QR.append(qrCode)
         QR[x].save(fileName)
     return qrFilename
 
 
-def merge(QR,sheet):
+def merge(QR, sheet):
     sheet = Image.open(sheet)
     sheetFileName = []
     for x in range(0, len(QR)):
@@ -198,7 +229,7 @@ def merge(QR,sheet):
             i += 1
         fileName = ("./sh/sheet%s.png" % i)
         sheetFileName.append(fileName)
-        code = Image.open(QR[x]).resize((280,280))
+        code = Image.open(QR[x]).resize((280, 280))
         sheet.paste(code, (918, 640))
         sheet.save(fileName)
     return sheetFileName
@@ -227,11 +258,17 @@ def clean(qr, sheet):
         os.remove(f)
 
 
-def generateExam(questions, choices, students, classe, exam, lang):
+def generateExam(questions, choices, workbook, number_of_students, lang, exam_id):
     sheet = loadAnswerSheet(questions, choices, lang)
-    QR = genQR(students, classe, exam[0])
+    names, massar_id, _class = loadstdntinfo(workbook, number_of_students)
+    QR = genQR(exam_id, questions, choices, names, massar_id, _class)
     imagelist = merge(QR, sheet)
     genPDF(imagelist)
     clean(QR,imagelist)
 
-generateExam(questions, choices, students, classes[0], exam[0], lang='fr')
+#generateExam(20, 5, "./gg.xlsx", 39, "fr", 1)
+
+names, massar_id, _class = loadstdntinfo("./gg.xlsx", 39)
+genQR(5, 20, 5, names, massar_id, _class)
+
+

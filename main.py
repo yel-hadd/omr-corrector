@@ -1,12 +1,11 @@
 import cv2
 import numpy as np
 import utils
+import os
+import csv
 
 questions = 20
 choices = 5
-path = './5.png'
-img = cv2.imread(path)
-imgFinal = img.copy()
 ans = np.zeros((questions, choices))
 
 ans = [[1, 0, 0, 0, 0],
@@ -36,7 +35,8 @@ exam = ['1st exam']
 classes = ['MIR', 'ESA']
 bareme = [0.5, 1.5, 0.5, 1.5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.5, 1, 0.5]
 
-def correctExam(img,ans,questions,choices,bareme):
+
+def correctExam(img, ans, questions, choices, bareme):
     widthImg = img.shape[1]
     heightImg = img.shape[0]
     imgContours = img.copy()
@@ -84,8 +84,6 @@ def correctExam(img,ans,questions,choices,bareme):
         matrixG = cv2.getPerspectiveTransform(ptq1, ptq2)
         imgQrDisplay = cv2.warpPerspective(img, matrixG, (500, 500))
         d = cv2.QRCodeDetector()
-        vals, p ,s = d.detectAndDecode(imgQrDisplay)
-        print(vals)
 
         # apply threshold
         imgWarpGray = cv2.cvtColor(imgWarpColored, cv2.COLOR_BGR2GRAY)
@@ -132,8 +130,6 @@ def correctExam(img,ans,questions,choices,bareme):
                 else:
                     score.append(0)
             sumScore = sum(score)
-            #print(score)
-            #print(sumScore)
 
         # Moderate Grading
         elif gradingType == 0:
@@ -146,15 +142,33 @@ def correctExam(img,ans,questions,choices,bareme):
                     else:
                         grading[j][i] = 0
             score = np.sum(grading, axis=1)
-            sumScore = sum(score)
+            sumScore = float(sum(score))
+
             #print(score)
             #print(sumScore)
         # print(sum(score))
         #cv2.imwrite("you.png", imgWarpColored)
     #print(sumScore, '/', sum(bareme))
     #cv2.imwrite('x.png', imgThresh)
+    # detect QR
+    d = cv2.QRCodeDetector()
+    global values
+    values, pp, ss = d.detectAndDecode(imgQrDisplay)
+    values = values[1:-1]
+    split = values.split(', ')
+    for element in split:
+        element = element[1:-1]
+    return sumScore, split
 
-    return sumScore
+result = []
+stdnt = []
 
-result = correctExam(img, ans, questions, choices, bareme)
-print(result)
+for image in os.listdir('./sheetz'):
+    z = cv2.imread(f'./sheetz/{image}')
+    v, data = correctExam(z, ans, questions, choices, bareme)
+    result.append(v)
+    stdnt.append(data)
+
+with open ("./result/r.csv", 'w', newline='') as f:
+    writer = csv.writer(f, delimiter="\n")
+    writer.writerow(result)
