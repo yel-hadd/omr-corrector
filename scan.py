@@ -34,8 +34,8 @@ def scan_document(path):
         # REMOVE 20 PIXELS FORM EACH SIDE
         imgWarpColored = imgWarpColored[20:imgWarpColored.shape[0] - 20, 20:imgWarpColored.shape[1] - 20]
         imgWarpColored = cv2.resize(imgWarpColored, (1414, 2000))
-        cv2.imwrite("scanned.png", imgWarpColored)
-        cv2.imshow("scanned.png", imgWarpColored)
+        cv2.imwrite("scanned.jpg", imgWarpColored)
+        cv2.imshow("scanned.jpg", imgWarpColored)
         cv2.waitKey(0)
 
-scan_document('./5555.png')
+scan_document('./5555.jpg')

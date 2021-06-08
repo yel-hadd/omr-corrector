@@ -147,9 +147,9 @@ def correctExam(img, ans, questions, choices, bareme):
             #print(score)
             #print(sumScore)
         # print(sum(score))
-        #cv2.imwrite("you.png", imgWarpColored)
+        #cv2.imwrite("you.jpg", imgWarpColored)
     #print(sumScore, '/', sum(bareme))
-    #cv2.imwrite('x.png', imgThresh)
+    #cv2.imwrite('x.jpg', imgThresh)
     # detect QR
     d = cv2.QRCodeDetector()
     global values
