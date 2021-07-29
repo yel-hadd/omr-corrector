@@ -29,14 +29,11 @@ ans = [[1, 0, 0, 0, 0],
        [0, 0, 0, 1, 0],
        [1, 0, 0, 0, 0]]
 
-
-students = ['YASSINE', 'DRIOUI', 'FACHA', 'BADIDA']
-exam = ['1st exam']
-classes = ['MIR', 'ESA']
 bareme = [0.5, 1.5, 0.5, 1.5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.5, 1, 0.5]
 
 
 def correctExam(img, ans, questions, choices, bareme):
+    global grading, score, sumScore
     widthImg = img.shape[1]
     heightImg = img.shape[0]
     imgContours = img.copy()
@@ -44,23 +41,23 @@ def correctExam(img, ans, questions, choices, bareme):
     nbrChoices = np.sum(ans, axis=1)
     nbrChoices = nbrChoices.tolist()
 
-    # image preprocessing
-    global grading, score, sumScore
-    imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    imgBlur = cv2.GaussianBlur(imgGray, (5, 5), 1)
-    imgCanny = cv2.Canny(imgBlur, 10, 50)
+    # Prétraitement d’image
+    imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) # grayscale
+    imgBlur = cv2.GaussianBlur(imgGray, (5, 5), 1) # blur
+    imgCanny = cv2.Canny(imgBlur, 10, 50) # canny
 
-    # finding all contours
+
+    # Detection des Contours
     contours, hierarchy = cv2.findContours(imgCanny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    cv2.drawContours(imgContours, contours, -1, (0, 255, 0), 2)
+    bb = cv2.drawContours(imgContours, contours, -1, (0, 255, 0), 2)
+    cv2.imwrite("canny.jpg", bb)
 
-    # find rectangles
+    # Trouver les rectangles
     rectCon = utils.rectContours(contours)
-    biggestContour = utils.getCornerPoints(rectCon[0])
+    biggestContour = utils.getCornerPoints(rectCon[0]) #rectangle de marquage
     gradePoints = utils.getCornerPoints(rectCon[1])
-    qrPoints = utils.getCornerPoints(rectCon[2])
+    qrPoints = utils.getCornerPoints(rectCon[2]) # rectangle de QR
 
-    # detect barcode
     if biggestContour.size != 0 and gradePoints.size != 0:
         cv2.drawContours(imgBiggestContours, biggestContour, -1, (0, 255, 0), 20)
         cv2.drawContours(imgBiggestContours, gradePoints, -5, (0, 0, 255), 20)
@@ -90,16 +87,17 @@ def correctExam(img, ans, questions, choices, bareme):
         imgThresh = cv2.threshold(imgWarpGray, 200, 255, cv2.THRESH_BINARY_INV)[1]
         boxes = utils.splitBoxes(imgThresh, choices, questions)
 
-        # Count NonZeroPixels and Detect empty and full cells
+        # Compter les pixels non nuls et détecter les cellules vides et pleines
+
         myPixelVal = np.zeros((questions, choices))
         empty = np.zeros((questions, choices))
-        Full = np.zeros((questions, choices))
+        Full = np.zeros((questions, choices)) #creation d une liste bidimensionnel
         countC = 0
         countR = 0
         for image in boxes:
             totalPixel = cv2.countNonZero(image)
             myPixelVal[countR][countC] = totalPixel
-            if myPixelVal[countR][countC] < image.shape[0] * image.shape[1] * 30 / 100:
+            if myPixelVal[countR][countC] < image.shape[0] * image.shape[1] * 30 / 100: # 30%
                 empty[countR][countC] = 1
                 Full[countR][countC] = 0
             else:
@@ -154,20 +152,29 @@ def correctExam(img, ans, questions, choices, bareme):
     d = cv2.QRCodeDetector()
     global values
     values, pp, ss = d.detectAndDecode(imgQrDisplay)
-    values = values[1:-1]
-    split = values.split(', ')
-    for element in split:
-        element = element[1:-1]
-    return sumScore, split
+    return sumScore, values
 
 result = []
 stdnt = []
+i= 0
 
 for image in os.listdir('./sheetz'):
     z = cv2.imread(f'./sheetz/{image}')
     v, data = correctExam(z, ans, questions, choices, bareme)
     result.append(v)
     stdnt.append(data)
+    i+=1
+
+for x in range(0, i):
+    stdnt[x] = stdnt[x][1:-1]
+    stdnt[x] = stdnt[x].split(", ")
+    stdnt[x][1] = stdnt[x][1][1:-1]
+    stdnt[x][2] = stdnt[x][2][1:-1]
+    stdnt[x][6] = stdnt[x][6][1:-1]
+    print(f"N: {stdnt[x][0]}, ID Massar: {stdnt[x][2]}, Full name: {stdnt[x][1]}, Score: {result[x]}")
+    #print(stdnt[x])
+
+
 
 with open ("./result/r.csv", 'w', newline='') as f:
     writer = csv.writer(f, delimiter="\n")

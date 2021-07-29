@@ -54,7 +54,7 @@ def SwitchFrFourChoices(argument):
         19: "./model/fr/19x4.jpg",
         20: "./model/fr/20x4.jpg",
     }
-    return switcher.get(argument, "nothing")
+    return switcher.get(argument)
 
 
 def SwitchFrFiveChoices(argument):
@@ -140,7 +140,7 @@ def SwitchArFiveChoices(argument):
         17: "./model/ar/ar17x5.jpg",
         18: "./model/ar/ar18x5.jpg",
         19: "./model/ar/ar19x5.jpg",
-        20: "./model/ar/ar20x5.png",
+        20: "./model/ar/ar20x5.jpg",
     }
     return switcher.get(argument)
 
@@ -175,58 +175,64 @@ def loadAnswerSheet(questions, choices, lang):
     return sheet
 
 
-
 def loadstdntinfo(workbook, number_of_students):
     global num, academie, level, semester, session, _class, direction, subject, school, teacher
     wb = opxl.load_workbook(f'{workbook}')
     sh1 = wb['NotesCC']
     names = []
     massar_id = []
-    _class = sh1['I9'].value
-    wb = opxl.load_workbook(f'{workbook}')
-    sh1 = wb['NotesCC']
-    academie = sh1['D7'].value
-    level = sh1['D9'].value
-    semester = sh1['D11'].value
-    session = sh1['D13'].value
-    _class = sh1['I9'].value
-    direction = sh1['I7'].value
-    subject = sh1['O11'].value
-    school = sh1['O7'].value
-    teacher = sh1['O9'].value
+    ordinal_number = []
 
+    _class = sh1['I9'].value  # extraire le nom du classe
+    academie = sh1['D7'].value  # extraire le nom de l'académie
+    level = sh1['D9'].value  # extraire le niveau scolaire
+    semester = sh1['D11'].value  # extraire la semester (1 ou 2)
+    session = sh1['D13'].value  # extraire la session
+    _class = sh1['I9'].value  # extraire le nom de classe
+    direction = sh1['I7'].value  # extraire le nom de direction
+    subject = sh1['O11'].value  # extraire le sujet
+    school = sh1['O7'].value  # extraire le nom de l'école
+    teacher = sh1['O9'].value  # extraire le nom de l'enseignant
+
+    # extraire les noms des etudiants
     names_column = sh1['D18':f'D{18+number_of_students-1}']
     for cell in names_column:
         for x in cell:
             names.append(x.value)
 
+    # extraire les identifiants Massar
     massar_column = sh1['C18':f'C{18+number_of_students-1}']
     for cell in massar_column:
         for x in cell:
             massar_id.append(x.value)
 
-    if len(names) == len(massar_id):
+    for x in range(1, len(names)+1):
+        ordinal_number.append(x)
+
+    if len(names) == len(massar_id) == len(ordinal_number):
+        wb.close()
         num = len(names)
-    wb.close()
-    return names, massar_id, _class, num
+        return ordinal_number, names, massar_id, _class, num
+    else:
+        return -1
 
 
-def genQR(exam_id, questions, choices, names, massar_id, _class, num):
+def genQR(order, exam_id, questions, choices, names, massar_id, _class, num):
     QR = []
     qrFilename = []
-    for x in range(0, num): ################################
+    for x in range(0, num):
         i = 1
-        while os.path.exists("./qr/code%s.png" % i):
+        while os.path.exists("./qr/code%s.jpg" % i):
             i += 1
-        fileName = ("./qr/code%s.png" % i)
+        fileName = ("./qr/code%s.jpg" % i)
         qrFilename.append(fileName)
-        qrCode = qr.make((exam_id, questions, choices, names[x], massar_id[x], _class))
+        qrCode = qr.make((order[x], names[x] , massar_id[x], questions, choices, exam_id, _class))
         QR.append(qrCode)
         QR[x].save(fileName)
     return qrFilename
 
 
-def merge(QR, sheet, names, massar_id):
+def merge(QR, sheet):
     sheet = Image.open(sheet)
     sheetFileName = []
     for x in range(0, len(QR)):
@@ -240,11 +246,13 @@ def merge(QR, sheet, names, massar_id):
         sheet.save(fileName)
     return sheetFileName
 
-def add_header_text(sheet, sheetFileName, names):
+
+def add_header_text(sheetFileName, names, order):
     fontsize = 20
     fontsize2 = 25
     regular = ImageFont.truetype('./fonts/font.ttf', fontsize)
     bold = ImageFont.truetype('./fonts/ArialTh.ttf', fontsize2)
+    big = ImageFont.truetype('./fonts/ArialTh.ttf', 40)
     x = 0
     list = []
 
@@ -259,7 +267,7 @@ def add_header_text(sheet, sheetFileName, names):
         d1 = ImageDraw.Draw(im)
 
         name = f'{names[x]}'
-        name = arabic_reshaper.reshape(name)  # correct its shape
+        name = arabic_reshaper.reshape(name)
         name = get_display(name)
 
         classh = f'{_class}'
@@ -269,6 +277,7 @@ def add_header_text(sheet, sheetFileName, names):
         semesterh = get_display(semesterh)
 
         sessionh = session
+        ordinal = str(order[x])
 
         levelh = level
         levelh = arabic_reshaper.reshape(levelh)
@@ -298,6 +307,7 @@ def add_header_text(sheet, sheetFileName, names):
         d1.text((1200, 80), classh, font=bold, fill=(0, 0, 0))
         d1.text((1130, 122), semesterh, font=regular, fill=(0, 0, 0))
         d1.text((1100, 182), sessionh, font=bold, fill=(0, 0, 0))
+        d1.text((700, 182), ordinal, font=big, fill=(0, 0, 0))
         d1.text((1010, 224), levelh, font=regular, fill=(0, 0, 0))
         d1.text((200, 20), academieh, font=regular, fill=(0, 0, 0))
         d1.text((110, 70), directionh, font=regular, fill=(0, 0, 0))
@@ -307,24 +317,6 @@ def add_header_text(sheet, sheetFileName, names):
         im.save(fileName)
     return list
 
-"""
-def genPDF(sheetFileName):
-    pdf = FPDF()
-    pdf.set_auto_page_break(0)
-    v = 0
-    for imageFile in sheetFileName:
-        print(imageFile)
-        cover = Image.open(imageFile)
-        width, height = cover.size
-        width, height = float(width * 0.264583), float(height * 0.264583)
-        pdf_size = {'P': {'w': 210, 'h': 297}, 'L': {'w': 297, 'h': 210}}
-        orientation = 'P' if width < height else 'L'
-        width = width if width < pdf_size[orientation]['w'] else pdf_size[orientation]['w']
-        height = height if height < pdf_size[orientation]['h'] else pdf_size[orientation]['h']
-        pdf.add_page(orientation=orientation)
-        pdf.image(imageFile, 0, 0, width, height)
-    pdf.output("exam.pdf", "F")
-"""
 
 def genPDF(sheetFileName, exam_id):
     filename = f"Exam_{exam_id+1}.pdf"
@@ -332,22 +324,25 @@ def genPDF(sheetFileName, exam_id):
         f.write(img2pdf.convert(sheetFileName))
 
 
-def clean(qr, sheet):
+def clean(qr, sheet, header_sheet):
     for f in qr:
         os.remove(f)
-    for f in sheet:
-        os.remove(f)
+    for x in sheet:
+        os.remove(x)
+    for x in header_sheet:
+        os.remove(x)
+
 
 def generateExam(questions, choices, workbook, number_of_students, lang, exam_id):
     exam_id1 = exam_id
     sheet = loadAnswerSheet(questions, choices, lang)
-    names, massar_id, _class, num = loadstdntinfo(workbook, number_of_students)
-    QR = genQR(exam_id, questions, choices, names, massar_id, _class, num)
-    imagelist = merge(QR, sheet, names, massar_id)
-    imagelist = add_header_text(sheet, imagelist, names)
-    genPDF(imagelist, exam_id1)
-    clean(QR,imagelist)
+    order, names, massar_id, _class, num = loadstdntinfo(workbook, number_of_students)
+    QR = genQR(order, exam_id, questions, choices, names, massar_id, _class, num)
+    imagelist = merge(QR, sheet)
+    imagelist2 = add_header_text(imagelist, names, order)
+    genPDF(imagelist2, exam_id1)
+    clean(QR, imagelist2, imagelist)
     _time2 = time.perf_counter()
     print(_time2)
 
-generateExam(20, 5, "./gg.xlsx", 40, "fr", 1)
+generateExam(16, 4, "./gg.xlsx", 15, "fr", 2)
