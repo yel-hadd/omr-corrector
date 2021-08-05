@@ -10,13 +10,71 @@ try:
 except:
     pass
 
-class Window(tk.Tk):
+def btn_clicked():
+    print('HI')
 
+class Window(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title('Maxi Correcteur')
         self.geometry('800x500')
-        Signup(self).pack()
+        self.frames = {}
+        container = ttk.Frame(self)
+        container.pack()
+
+
+
+        """acc = Home(container, self)
+        acc.pack()
+        self.frames[Home] = acc
+
+        bienvenue = Welcome(container)
+        self.frames[Welcome] = bienvenue
+
+        connex = Login(container)
+        self.frames[Login] = connex
+
+        inscr = Signup(container)
+        self.frames[Signup] = inscr
+
+        oblie = Forgot_password(container)
+        self.frames[Forgot_password] = oblie
+
+        cor = Correct(container)
+        self.frames[Correct] = cor
+
+        gen = Generate(container)
+        self.frames[Generate] = gen
+
+        con = Contact(container)
+        self.frames[Contact] = con"""
+
+        """for FrameClass in (Home, Login, Signup, Forgot_password, Generate, Correct, Contact, Welcome):
+            frame = FrameClass(container, Window)
+            self.frames[FrameClass] = frame"""
+
+
+        self.show_frame(Welcome)
+
+    def show_frame(self, container):
+        if container == Welcome:
+            Welcome(self).pack()
+        elif container == Home:
+            Home(self).pack()
+        elif container == Login:
+            Login(self).pack()
+        elif container == Signup:
+            Signup(self).pack()
+        elif container == Forgot_password:
+            Forgot_password(self).pack()
+        elif container == Generate:
+            Generate(self).pack()
+        elif container == Correct:
+            Correct(self).pack()
+        elif container == Contact:
+            Contact(self).pack()
+
+
 
 class Home(ttk.Frame):
     def quitf(self):
@@ -42,7 +100,7 @@ class Home(ttk.Frame):
             image=self.img0,
             borderwidth=0,
             highlightthickness=0,
-            command=self.btn_clicked,
+            command=lambda: container.show_frame(Generate),
             relief="flat")
 
         b0.place(
@@ -55,7 +113,7 @@ class Home(ttk.Frame):
             image=self.img1,
             borderwidth=0,
             highlightthickness=0,
-            command=self.btn_clicked,
+            command=lambda: container.show_frame(Correct),
             relief="flat")
 
         b1.place(
@@ -81,7 +139,7 @@ class Home(ttk.Frame):
             image=self.img3,
             borderwidth=0,
             highlightthickness=0,
-            command=self.btn_clicked,
+            command=lambda: container.show_frame(Contact),
             relief="flat")
 
         b3.place(
@@ -130,7 +188,7 @@ class Home(ttk.Frame):
             image=self.img4,
             borderwidth=0,
             highlightthickness=0,
-            command=self.btn_clicked,
+            command=btn_clicked,
             relief="flat")
 
         b4.place(
@@ -143,7 +201,7 @@ class Home(ttk.Frame):
             image=self.img5,
             borderwidth=0,
             highlightthickness=0,
-            command=self.btn_clicked,
+            command=btn_clicked,
             relief="flat")
 
         b5.place(
@@ -156,7 +214,7 @@ class Home(ttk.Frame):
             image=self.img6,
             borderwidth=0,
             highlightthickness=0,
-            command=self.btn_clicked,
+            command=btn_clicked,
             relief="flat")
 
         b6.place(
@@ -264,7 +322,7 @@ class Login(ttk.Frame):
             image=self.img0,
             borderwidth=0,
             highlightthickness=0,
-            command=self.btn_clicked,
+            command=lambda: container.show_frame(Signup),
             relief="flat")
 
         b0.place(
@@ -277,7 +335,7 @@ class Login(ttk.Frame):
             image=self.img1,
             borderwidth=0,
             highlightthickness=0,
-            command=self.btn_clicked,
+            command=btn_clicked,
             relief="flat")
 
         b1.place(
@@ -290,7 +348,7 @@ class Login(ttk.Frame):
             image=self.img2,
             borderwidth=0,
             highlightthickness=0,
-            command=self.btn_clicked,
+            command=lambda: container.show_frame(Welcome),
             relief="flat")
 
         b2.place(
@@ -303,7 +361,7 @@ class Login(ttk.Frame):
             image=self.img3,
             borderwidth=0,
             highlightthickness=0,
-            command=self.btn_clicked,
+            command=lambda: container.show_frame(Forgot_password),
             relief="flat")
 
         b3.place(
@@ -322,7 +380,7 @@ class Login(ttk.Frame):
             image=self.img4,
             borderwidth=0,
             highlightthickness=0,
-            command=self.login_btn,
+            command=lambda: self.login_btn(container),
             relief="flat")
 
         b4.place(
@@ -351,7 +409,7 @@ class Login(ttk.Frame):
         else:
             return 0
 
-    def login_btn(self):
+    def login_btn(self, container):
         cp = self.check()
         if cp == 0:
             self.canvas.itemconfigure(self.nbox, text='Invalid Captcha')
@@ -365,6 +423,7 @@ class Login(ttk.Frame):
                 self.canvas.itemconfigure(self.cbox, text=question)
             elif str == 1:
                 self.canvas.itemconfigure(self.nbox, text="Successfully logged in!", fill='#008000')
+                container.show_frame(Home)
             elif str == 2:
                 self.canvas.itemconfigure(self.nbox, text="Invalid email or password")
                 self.loadcaptcha()
@@ -394,7 +453,7 @@ class Signup(ttk.Frame):
             image=self.img0,
             borderwidth=0,
             highlightthickness=0,
-            command=self.btn_clicked,
+            command=lambda: container.show_frame(Login),
             relief="flat")
 
         b0.place(
@@ -407,7 +466,7 @@ class Signup(ttk.Frame):
             image=self.img1,
             borderwidth=0,
             highlightthickness=0,
-            command=self.btn_clicked,
+            command=btn_clicked,
             relief="flat")
 
         b1.place(
@@ -420,7 +479,7 @@ class Signup(ttk.Frame):
             image=self.img2,
             borderwidth=0,
             highlightthickness=0,
-            command=self.btn_clicked,
+            command=lambda: container.show_frame(Welcome),
             relief="flat")
 
         b2.place(
@@ -433,7 +492,7 @@ class Signup(ttk.Frame):
             image=self.img3,
             borderwidth=0,
             highlightthickness=0,
-            command=self.btn_clicked,
+            command=lambda: container.show_frame(Login),
             relief="flat")
 
         b3.place(
@@ -571,9 +630,6 @@ class Signup(ttk.Frame):
         else:
             return 0
 
-    def btn_clicked(self):
-        print('Button clicked')
-
     def signup_btn(self):
         cp = self.s_check()
         if cp == 0:
@@ -600,20 +656,738 @@ class Signup(ttk.Frame):
                 self.canvas.itemconfigure(self.cbox, text=question)
 
 class Forgot_password(ttk.Frame):
+    def reset(self):
+        a = auth.reset_password(self.entry0.get())
+        if a == 0:
+            self.canvas.itemconfigure(self.nbox, text='Invalid Email Address', fill='#FF0000')
+        else:
+            self.canvas.itemconfigure(self.nbox, text='If the the email address exists password reset link will be sent', fill='#0000CD')
+
+
+    def __init__(self, container):
+        super().__init__(container)
+        self.canvas = Canvas(
+            bg="#ffffff",
+            height=500,
+            width=800,
+            bd=0,
+            highlightthickness=0,
+            relief="ridge")
+        self.canvas.place(x=0, y=0)
+
+        self.entry0_img = PhotoImage(file=f"./src/reset/img_textBox0.png")
+        entry0_bg = self.canvas.create_image(
+            399.0, 246.5,
+            image=self.entry0_img)
+
+        self.entry0 = Entry(
+            bd=0,
+            font='Calibri 20',
+            bg="#eeeeee",
+            highlightthickness=0)
+
+        self.entry0.place(
+            x=98.05547618865967, y=223,
+            width=601.8890476226807,
+            height=45)
+
+        self.canvas.create_text(
+            396.0, 141.5,
+            text="Réinitialisez votre mot de passe",
+            fill="#000000",
+            font=("Kanit Regular", 31))
+
+        self.img0 = PhotoImage(file=f"./src/reset/img0.png")
+        b0 = Button(
+            image=self.img0,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: container.show_frame(Login),
+            relief="flat")
+
+        b0.place(
+            x=631, y=35,
+            width=101,
+            height=27)
+
+        self.img1 = PhotoImage(file=f"./src/reset/img1.png")
+        b1 = Button(
+            image=self.img1,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: container.show_frame(Signup),
+            relief="flat")
+
+        b1.place(
+            x=518, y=37,
+            width=99,
+            height=24)
+
+        self.img2 = PhotoImage(file=f"./src/reset/img2.png")
+        b2 = Button(
+            image=self.img2,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: container.show_frame(Welcome),
+            relief="flat")
+
+        b2.place(
+            x=66, y=31,
+            width=160,
+            height=38)
+
+        self.canvas.create_text(
+            400.0, 181.0,
+            text="Entrez l'adresse e-mail que vous avez utilisé pour vous inscrire",
+            fill="#4b4a4a",
+            font=("Lato Regular", 15))
+
+        self.nbox = self.canvas.create_text(
+            400.0, 355,
+            text="",
+            fill="#FF0000",
+            font=("Lato Regular", 16))
+
+        self.img3 = PhotoImage(file=f"./src/reset/img3.png")
+        b3 = Button(
+            image=self.img3,
+            borderwidth=0,
+            highlightthickness=0,
+            command=self.reset,
+            relief="flat")
+
+        b3.place(
+            x=320, y=291,
+            width=158,
+            height=39)
+
+        self.img4 = PhotoImage(file=f"./src/reset/img4.png")
+        b4 = Button(
+            image=self.img4,
+            borderwidth=0,
+            highlightthickness=0,
+            command=btn_clicked,
+            relief="flat")
+
+        b4.place(
+            x=59, y=398,
+            width=680,
+            height=65)
+
+class Generate(ttk.Frame):
+    def quitf(self):
+        self.quit()
+
+    def btn_clicked(self):
+        print('btn_clicked')
+
     def __init__(self, container):
         super().__init__(container)
 
-class Genrate(ttk.Frame):
-    def __init__(self, container):
-        super().__init__(container)
+        self.canvas = Canvas(
+            bg="#ffffff",
+            height=500,
+            width=800,
+            bd=0,
+            highlightthickness=0,
+            relief="ridge")
+        self.canvas.place(x=0, y=0)
+
+        self.entry0_img = PhotoImage(file=f"./src/generate/img_textBox0.png")
+        entry0_bg = self.canvas.create_image(
+            236.0, 214.5,
+            image=self.entry0_img)
+
+        self.entry0 = Entry(
+            bd=0,
+            bg="#eeeeee",
+            font='Calibri 14',
+            highlightthickness=0)
+
+        self.entry0.place(
+            x=102.5240249633789, y=196,
+            width=266.9519500732422,
+            height=35)
+
+        self.entry1_img = PhotoImage(file=f"./src/generate/img_textBox1.png")
+        entry1_bg = self.canvas.create_image(
+            570.0, 215.5,
+            image=self.entry1_img)
+
+        self.entry1 = Entry(
+            bd=0,
+            font='Calibri 14',
+            bg="#eeeeee",
+            highlightthickness=0)
+
+        self.entry1.place(
+            x=436.5240249633789, y=197,
+            width=266.9519500732422,
+            height=35)
+
+        self.entry2_img = PhotoImage(file=f"./src/generate/img_textBox2.png")
+        entry2_bg = self.canvas.create_image(
+            237.0, 288.0,
+            image=self.entry2_img)
+
+        self.entry2 = Entry(
+            bd=0,
+            font='Calibri 14',
+            bg="#eeeeee",
+            highlightthickness=0)
+
+        self.entry2.place(
+            x=103.5240249633789, y=270,
+            width=266.9519500732422,
+            height=34)
+
+        self.entry3_img = PhotoImage(file=f"./src/generate/img_textBox3.png")
+        entry3_bg = self.canvas.create_image(
+            236.0, 361.0,
+            image=self.entry3_img)
+
+        self.entry3 = Entry(
+            bd=0,
+            font='Calibri 14',
+            bg="#eeeeee",
+            highlightthickness=0)
+
+        self.entry3.place(
+            x=102.5240249633789, y=343,
+            width=266.9519500732422,
+            height=34)
+
+        self.entry4_img = PhotoImage(file=f"./src/generate/img_textBox4.png")
+        entry4_bg = self.canvas.create_image(
+            571.0, 288.5,
+            image=self.entry4_img)
+
+        self.entry4 = Entry(
+            bd=0,
+            font='Calibri 14',
+            bg="#eeeeee",
+            highlightthickness=0)
+
+        self.entry4.place(
+            x=437.5240249633789, y=270,
+            width=266.9519500732422,
+            height=35)
+
+        self.canvas.create_text(
+            190, 178.5,
+            text="Nombre de questions",
+            fill="#000000",
+            font=("Kanit Light", 16))
+
+        self.canvas.create_text(
+            502, 175,
+            text="Nombre de choix",
+            fill="#000000",
+            font=("Kanit Light", 16))
+
+        self.canvas.create_text(
+            127.0, 252.0,
+            text="Langue",
+            fill="#000000",
+            font=("Kanit Light", 16))
+
+        self.canvas.create_text(
+            485.0, 252.5,
+            text="Fichier Excel",
+            fill="#000000",
+            font=("Kanit Light", 16))
+
+        self.canvas.create_text(
+            185, 324.0,
+            text="Répertoire de sortie",
+            fill="#000000",
+            font=("Kanit Light", 16))
+
+        self.canvas.create_text(
+            402.0, 102,
+            text="générer les feuilles d'examen",
+            fill="#000000",
+            font=("Kanit Regular", 24))
+
+        self.canvas.create_text(
+            402.0, 138,
+            text="un moyen rapide et efficace pour générer les feuilles d'examen",
+            fill="#4b4a4a",
+            font=("Lato SemiBold", 14))
+
+        self.img0 = PhotoImage(file=f"./src/generate/img0.png")
+        b0 = Button(
+            image=self.img0,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: container.show_frame(Home),
+            relief="flat")
+
+        b0.place(
+            x=65, y=27,
+            width=167,
+            height=40)
+
+        self.img1 = PhotoImage(file=f"./src/generate/img1.png")
+        b1 = Button(
+            image=self.img1,
+            borderwidth=0,
+            highlightthickness=0,
+            command=btn_clicked,
+            relief="flat")
+
+        b1.place(
+            x=426, y=340,
+            width=166,
+            height=41)
+
+        self.img2 = PhotoImage(file=f"./src/generate/img2.png")
+        b2 = Button(
+            image=self.img2,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: container.show_frame(Home),
+            relief="flat")
+
+        b2.place(
+            x=636, y=33,
+            width=25,
+            height=25)
+
+        self.img3 = PhotoImage(file=f"./src/generate/img3.png")
+        b3 = Button(
+            image=self.img3,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: container.show_frame(Correct),
+            relief="flat")
+
+        b3.place(
+            x=672, y=33,
+            width=25,
+            height=25)
+
+        self.img4 = PhotoImage(file=f"./src/generate/img4.png")
+        b4 = Button(
+            image=self.img4,
+            borderwidth=0,
+            highlightthickness=0,
+            command=self.quitf,
+            relief="flat")
+
+        b4.place(
+            x=709, y=33,
+            width=25,
+            height=25)
+
+        self.img5 = PhotoImage(file=f"./src/generate/img5.png")
+        b5 = Button(
+            image=self.img5,
+            borderwidth=0,
+            highlightthickness=0,
+            command=btn_clicked,
+            relief="flat")
+
+        b5.place(
+            x=90, y=413,
+            width=624,
+            height=59)
 
 class Correct(ttk.Frame):
+    def quitf(self):
+        self.quit()
+    def btn_clicked(self):
+        print('Button Clicked')
+
     def __init__(self, container):
         super().__init__(container)
 
-class Contact(ttk.Frame):
+        self.canvas = Canvas(
+            bg="#ffffff",
+            height=500,
+            width=800,
+            bd=0,
+            highlightthickness=0,
+            relief="ridge")
+        self.canvas.place(x=0, y=0)
+
+        self.entry0_img = PhotoImage(file=f"./src/correct/img_textBox0.png")
+        entry0_bg = self.canvas.create_image(
+            296.0, 369.0,
+            image=self.entry0_img)
+
+        self.entry0 = Entry(
+            bd=0,
+            bg="#d6d4d4",
+            highlightthickness=0)
+
+        self.entry0.place(
+            x=166.23933792114258, y=351,
+            width=259.52132415771484,
+            height=34)
+
+        self.canvas.create_text(
+            245.5, 334.0,
+            text="Répertoire de sortie",
+            fill="#000000",
+            font=("Kanit Light", 16))
+
+        self.canvas.create_text(
+            401.5, 94.5,
+            text="Corriger les feuilles d'examen",
+            fill="#000000",
+            font=("Kanit Regular", 25))
+
+        self.canvas.create_text(
+            402.0, 138.5,
+            text="un moyen rapide et efficace pour corriger les feuilles d'examen",
+            fill="#4b4a4a",
+            font=("Lato", 13))
+
+        self.img0 = PhotoImage(file=f"./src/correct/img0.png")
+        b0 = Button(
+            image=self.img0,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: container.show_frame(Home),
+            relief="flat")
+
+        b0.place(
+            x=74, y=23,
+            width=162,
+            height=39)
+
+        self.img1 = PhotoImage(file=f"./src/correct/img1.png")
+        b1 = Button(
+            image=self.img1,
+            borderwidth=0,
+            highlightthickness=0,
+            command=btn_clicked,
+            relief="flat")
+
+        b1.place(
+            x=483, y=351,
+            width=161,
+            height=40)
+
+        self.img2 = PhotoImage(file=f"./src/correct/img2.png")
+        b2 = Button(
+            image=self.img2,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: container.show_frame(Home),
+            relief="flat")
+
+        b2.place(
+            x=630, y=29,
+            width=25,
+            height=25)
+
+        self.img3 = PhotoImage(file=f"./src/correct/img3.png")
+        b3 = Button(
+            image=self.img3,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: container.show_frame(Generate),
+            relief="flat")
+
+        b3.place(
+            x=665, y=29,
+            width=25,
+            height=25)
+
+        self.img4 = PhotoImage(file=f"./src/correct/img4.png")
+        b4 = Button(
+            image=self.img4,
+            borderwidth=0,
+            highlightthickness=0,
+            command=self.quitf,
+            relief="flat")
+
+        b4.place(
+            x=700, y=29,
+            width=25,
+            height=25)
+
+        self.img5 = PhotoImage(file=f"./src/correct/img5.png")
+        b5 = Button(
+            image=self.img5,
+            borderwidth=0,
+            highlightthickness=0,
+            command=btn_clicked,
+            relief="flat")
+
+        b5.place(
+            x=99, y=420,
+            width=607,
+            height=58)
+
+        self.img6 = PhotoImage(file=f"./src/correct/img6.png")
+        b6 = Button(
+            image=self.img6,
+            borderwidth=0,
+            highlightthickness=0,
+            command=btn_clicked,
+            relief="flat")
+
+        b6.place(
+            x=426, y=174,
+            width=280,
+            height=128)
+
+        self.img7 = PhotoImage(file=f"./src/correct/img7.png")
+        b7 = Button(
+            image=self.img7,
+            borderwidth=0,
+            highlightthickness=0,
+            command=btn_clicked,
+            relief="flat")
+
+        b7.place(
+            x=101, y=174,
+            width=280,
+            height=128)
+
+class Welcome(ttk.Frame):
+    def btn_clicked(self):
+        print('Button Clicked')
     def __init__(self, container):
         super().__init__(container)
+        self.canvas = Canvas(
+            bg="#ffffff",
+            height=500,
+            width=800,
+            bd=0,
+            highlightthickness=0,
+            relief="ridge")
+        self.canvas.place(x=0, y=0)
+
+        self.background_img = PhotoImage(file=f"./src/welcome/background.png")
+        background = self.canvas.create_image(
+            399.5, 250.0,
+            image=self.background_img)
+
+        self.img0 = PhotoImage(file=f"./src/welcome/img0.png")
+        b0 = Button(
+            image=self.img0,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: container.show_frame(Signup),
+            relief="flat")
+
+        b0.place(
+            x=239, y=430,
+            width=137,
+            height=34)
+
+        self.img1 = PhotoImage(file=f"./src/welcome/img1.png")
+        b1 = Button(
+            image=self.img1,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: container.show_frame(Login),
+            relief="flat")
+
+        b1.place(
+            x=423, y=430,
+            width=137,
+            height=34)
+
+        self.canvas.create_text(
+            399.0, 389.5,
+            text="BIENVENU DANS MAXI CORRECTEUR!",
+            fill="#000000",
+            font=("Lato SemiBold", 23))
+
+class Contact(ttk.Frame):
+    def btn_clicked(self):
+        print('Clicked')
+
+    def quitf(self):
+        self.quit()
+
+    def __init__(self, container):
+        super().__init__(container)
+        self.canvas = Canvas(
+            bg="#00766f",
+            height=500,
+            width=800,
+            bd=0,
+            highlightthickness=0,
+            relief="ridge")
+        self.canvas.place(x=0, y=0)
+
+        self.background_img = PhotoImage(file=f"./src/contact/background.png")
+        background = self.canvas.create_image(
+            400.0, 250.0,
+            image=self.background_img)
+
+        self.img0 = PhotoImage(file=f"./src/contact/img0.png")
+        b0 = Button(
+            image=self.img0,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: container.show_frame(Home),
+            relief="flat")
+
+        b0.place(
+            x=599, y=21,
+            width=25,
+            height=25)
+
+        self.img1 = PhotoImage(file=f"./src/contact/img1.png")
+        b1 = Button(
+            image=self.img1,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: container.show_frame(Correct),
+            relief="flat")
+
+        b1.place(
+            x=635, y=21,
+            width=25,
+            height=25)
+
+        self.img2 = PhotoImage(file=f"./src/contact/img2.png")
+        b2 = Button(
+            image=self.img2,
+            borderwidth=0,
+            highlightthickness=0,
+            command=self.quitf,
+            relief="flat")
+
+        b2.place(
+            x=706, y=21,
+            width=25,
+            height=25)
+
+        self.img3 = PhotoImage(file=f"./src/contact/img3.png")
+        b3 = Button(
+            image=self.img3,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: container.show_frame(Generate),
+            relief="flat")
+
+        b3.place(
+            x=671, y=21,
+            width=25,
+            height=25)
+
+        self.img4 = PhotoImage(file=f"./src/contact/img4.png")
+        b4 = Button(
+            image=self.img4,
+            borderwidth=0,
+            highlightthickness=0,
+            command=btn_clicked,
+            relief="flat")
+
+        b4.place(
+            x=57, y=14,
+            width=162,
+            height=39)
+
+        self.canvas.create_text(
+            399.5, 121.5,
+            text="Contactez-nous:",
+            fill="#ffffff",
+            font=("Kanit Bold", int(34.36180877685547)))
+
+        self.canvas.create_text(
+            244.0, 206.0,
+            text="Librarie Essalam Al-Jadida",
+            fill="#000000",
+            font=("Lato SemiBold", 16))
+
+        self.canvas.create_text(
+            243.5, 231.0,
+            text="Lorem ipsum dolor sit amet",
+            fill="#000000",
+            font=("Montserrat Regular", 10))
+
+        self.canvas.create_text(
+            240.5, 267.0,
+            text="Télephone:",
+            fill="#000000",
+            font=("Montserrat Bold", 14))
+
+        self.canvas.create_text(
+            240.5, 324.0,
+            text="Email:",
+            fill="#000000",
+            font=("Montserrat Bold", 14))
+
+        self.canvas.create_text(
+            240.5, 383.0,
+            text="Adresse:",
+            fill="#000000",
+            font=("Montserrat Bold", 14))
+
+        self.canvas.create_text(
+            241.0, 294.5,
+            text="0600000000",
+            fill="#000000",
+            font=("AnonymousPro Regular", 13))
+
+        self.canvas.create_text(
+            239.5, 352.5,
+            text="justanemail@gmail.com",
+            fill="#000000",
+            font=("AnonymousPro Regular", 13))
+
+        self.canvas.create_text(
+            236.5, 410.5,
+            text="adresse agadir agadir",
+            fill="#000000",
+            font=("AnonymousPro Regular", 13))
+
+        self.canvas.create_text(
+            561.5, 206.0,
+            text="Sté VALKAN SARL",
+            fill="#000000",
+            font=("Lato SemiBold", 16))
+
+        self.canvas.create_text(
+            561.5, 231.0,
+            text="Lorem ipsum dolor sit amet",
+            fill="#000000",
+            font=("Montserrat Regular", 10))
+
+        self.canvas.create_text(
+            558.5, 267.0,
+            text="Télephone:",
+            fill="#000000",
+            font=("Montserrat Bold", 14))
+
+        self.canvas.create_text(
+            558.5, 324.0,
+            text="Email:",
+            fill="#000000",
+            font=("Montserrat Bold", 14))
+
+        self.canvas.create_text(
+            558.5, 383.0,
+            text="Adresse:",
+            fill="#000000",
+            font=("Montserrat Bold", 14))
+
+        self.canvas.create_text(
+            559.0, 294.5,
+            text="0600000000",
+            fill="#000000",
+            font=("AnonymousPro Regular", 13))
+
+        self.canvas.create_text(
+            557.5, 352.5,
+            text="justanemail@gmail.com",
+            fill="#000000",
+            font=("AnonymousPro Regular", 13))
+
+        self.canvas.create_text(
+            554.5, 410.5,
+            text="adresse agadir agadir",
+            fill="#000000",
+            font=("AnonymousPro Regular", 13))
 
 
 root = Window()

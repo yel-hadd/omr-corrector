@@ -45,3 +45,15 @@ def signup(email, password):
     except:
         return 2
         #"Email already exists"
+
+def reset_password(email):
+    if not(re.match(regex, email)):
+        return 0
+        #"Invalid Email Address"
+    try:
+        auth.send_password_reset_email(email)
+        return 1
+        #'If the the email address exists password reset link will be sent'
+    except:
+        return 2
+        #'If the the email address exists password reset link will be sent'
