@@ -5,10 +5,7 @@ from bidi.algorithm import get_display
 import arabic_reshaper
 import img2pdf
 import openpyxl as opxl
-import time
-
-_time = time.perf_counter()
-print(_time)
+import transliteration as tl
 
 r = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
 
@@ -175,6 +172,20 @@ def loadAnswerSheet(questions, choices, lang):
     return sheet
 
 
+def count_stdnts(workbook):
+    wb = opxl.load_workbook(f'{workbook}')
+    sh1 = wb['NotesCC']
+    v = sh1['D57'].value
+    number_of_students = 0
+    names_column = sh1['D18':'D180']
+    for cell in names_column:
+        for x in cell:
+            if x.value != None:
+                number_of_students += 1
+            else:
+                return number_of_students
+
+
 def loadstdntinfo(workbook, number_of_students):
     global num, academie, level, semester, session, _class, direction, subject, school, teacher
     wb = opxl.load_workbook(f'{workbook}')
@@ -195,18 +206,18 @@ def loadstdntinfo(workbook, number_of_students):
     teacher = sh1['O9'].value  # extraire le nom de l'enseignant
 
     # extraire les noms des etudiants
-    names_column = sh1['D18':f'D{18+number_of_students-1}']
+    names_column = sh1['D18':f'D{18 + number_of_students - 1}']
     for cell in names_column:
         for x in cell:
             names.append(x.value)
 
     # extraire les identifiants Massar
-    massar_column = sh1['C18':f'C{18+number_of_students-1}']
+    massar_column = sh1['C18':f'C{18 + number_of_students - 1}']
     for cell in massar_column:
         for x in cell:
             massar_id.append(x.value)
 
-    for x in range(1, len(names)+1):
+    for x in range(1, len(names) + 1):
         ordinal_number.append(x)
 
     if len(names) == len(massar_id) == len(ordinal_number):
@@ -217,7 +228,7 @@ def loadstdntinfo(workbook, number_of_students):
         return -1
 
 
-def genQR(order, exam_id, questions, choices, names, massar_id, _class, num):
+"""def genQR(order, questions, choices, names, massar_id, _class, num):
     QR = []
     qrFilename = []
     for x in range(0, num):
@@ -226,9 +237,55 @@ def genQR(order, exam_id, questions, choices, names, massar_id, _class, num):
             i += 1
         fileName = ("./qr/code%s.jpg" % i)
         qrFilename.append(fileName)
-        qrCode = qr.make((order[x], names[x] , massar_id[x], questions, choices, exam_id, _class))
+        o = f"{order[x]},{names[x]},{massar_id[x]},{questions},{choices},{_class}"
+        qrCode = qr.make(o)
         QR.append(qrCode)
         QR[x].save(fileName)
+        t = test_qr(fileName)
+        while t ==1:
+            pass
+    return qrFilename"""
+
+
+def genQR(order, questions, choices, names, massar_id, _class, num):
+    qrFilename = []
+    for x in range(0, num):
+        qr1 = qr.QRCode(
+            version=3,
+            error_correction=qr.constants.ERROR_CORRECT_H,
+            box_size=40,
+            border=4,
+        )
+
+        # transliteration
+        t1 = tl.only_roman_chars(names[x])
+        t2 = tl.only_roman_chars(_class)
+
+        if t1 == False and t2 == False:
+            n = tl.transString(names[x], t1)
+            c = tl.transString(_class, t2)
+            b = 'Both Tra'
+            data = f"{order[x]},{n},{massar_id[x]},{questions},{choices},{c},{b}"
+        elif t1 == False:
+            n = tl.transString(names[x], t1)
+            b = 'Name Tra'
+            data = f"{order[x]},{n},{massar_id[x]},{questions},{choices},{_class},{b}"
+        elif t2 == False:
+            c = tl.transString(_class, t2)
+            b = 'Classe Tra'
+            data = f"{order[x]},{names[x]},{massar_id[x]},{questions},{choices},{c},{b}"
+        else:
+            data = f"{order[x]},{names[x]},{massar_id[x]},{questions},{choices},{_class}"
+
+        qr1.add_data(data, optimize=True)
+        qr1.make(fit=True)
+        jpg = qr1.make_image()
+        i = 1
+        while os.path.exists("./qr/code%s.jpg" % i):
+            i += 1
+        fileName = ("./qr/code%s.jpg" % i)
+        jpg.save(fileName)
+        qrFilename.append(fileName)
     return qrFilename
 
 
@@ -241,7 +298,7 @@ def merge(QR, sheet):
             i += 1
         fileName = ("./sh/sheet%s.jpg" % i)
         sheetFileName.append(fileName)
-        code = Image.open(QR[x]).resize((280, 280))
+        code = Image.open(QR[x]).resize((285, 285))
         sheet.paste(code, (918, 640))
         sheet.save(fileName)
     return sheetFileName
@@ -318,8 +375,8 @@ def add_header_text(sheetFileName, names, order):
     return list
 
 
-def genPDF(sheetFileName, exam_id):
-    filename = f"Exam_{exam_id+1}.pdf"
+def genPDF(sheetFileName, rep):
+    filename = f"{rep}/Exam.pdf"
     with open(filename, "wb") as f:
         f.write(img2pdf.convert(sheetFileName))
 
@@ -333,16 +390,14 @@ def clean(qr, sheet, header_sheet):
         os.remove(x)
 
 
-def generateExam(questions, choices, workbook, number_of_students, lang, exam_id):
-    exam_id1 = exam_id
+def generateExam(questions, choices, workbook, lang, rep):
     sheet = loadAnswerSheet(questions, choices, lang)
+    number_of_students = count_stdnts(workbook)
     order, names, massar_id, _class, num = loadstdntinfo(workbook, number_of_students)
-    QR = genQR(order, exam_id, questions, choices, names, massar_id, _class, num)
+    QR = genQR(order, questions, choices, names, massar_id, _class, num)
     imagelist = merge(QR, sheet)
     imagelist2 = add_header_text(imagelist, names, order)
-    genPDF(imagelist2, exam_id1)
-    clean(QR, imagelist2, imagelist)
-    _time2 = time.perf_counter()
-    print(_time2)
+    genPDF(imagelist2, rep)
+    #clean(QR, imagelist2, imagelist)
 
-generateExam(16, 4, "./gg.xlsx", 15, "fr", 2)
+generateExam(20, 3, './gg.xlsx', 'fr', '.')

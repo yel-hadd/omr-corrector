@@ -1,8 +1,11 @@
 import tkinter as tk
 from tkinter import *
 from tkinter import ttk
+from tkinter import filedialog, messagebox
+import main as m
 import auth
 import captcha
+import generateExam as gen
 
 try:
     from ctypes import windll
@@ -22,39 +25,7 @@ class Window(tk.Tk):
         container = ttk.Frame(self)
         container.pack()
 
-
-
-        """acc = Home(container, self)
-        acc.pack()
-        self.frames[Home] = acc
-
-        bienvenue = Welcome(container)
-        self.frames[Welcome] = bienvenue
-
-        connex = Login(container)
-        self.frames[Login] = connex
-
-        inscr = Signup(container)
-        self.frames[Signup] = inscr
-
-        oblie = Forgot_password(container)
-        self.frames[Forgot_password] = oblie
-
-        cor = Correct(container)
-        self.frames[Correct] = cor
-
-        gen = Generate(container)
-        self.frames[Generate] = gen
-
-        con = Contact(container)
-        self.frames[Contact] = con"""
-
-        """for FrameClass in (Home, Login, Signup, Forgot_password, Generate, Correct, Contact, Welcome):
-            frame = FrameClass(container, Window)
-            self.frames[FrameClass] = frame"""
-
-
-        self.show_frame(Welcome)
+        self.show_frame(Correct)
 
     def show_frame(self, container):
         if container == Welcome:
@@ -73,8 +44,6 @@ class Window(tk.Tk):
             Correct(self).pack()
         elif container == Contact:
             Contact(self).pack()
-
-
 
 class Home(ttk.Frame):
     def quitf(self):
@@ -775,11 +744,34 @@ class Forgot_password(ttk.Frame):
             height=65)
 
 class Generate(ttk.Frame):
+    def select_path(self, event):
+        self.output_path = str
+        # window.withdraw()
+        self.output_path = filedialog.askdirectory(title= ' Répertoire de sortie')
+        self.entry3.delete(0, END)
+        self.entry3.insert(0, self.output_path)
+
+    def select_file(self, event):
+        self.file_path = str
+        self.file_path = filedialog.askopenfilename(title = "Select file",filetypes = (("MS Excel","*.xlsx"),))
+        self.entry4.delete(0, END)
+        self.entry4.insert(0, self.file_path)
+
+    def gen_button(self):
+        question = int(self.entry0.get())
+        choice = int(self.entry1.get())
+        lang = str(self.entry2.get())
+        excel = str(self.entry4.get())
+        output = str(self.entry3.get())
+        gen.generateExam(question, choice, excel, lang, output)
+        print('done')
+
     def quitf(self):
         self.quit()
 
     def btn_clicked(self):
-        print('btn_clicked')
+        print('Hi')
+
 
     def __init__(self, container):
         super().__init__(container)
@@ -851,6 +843,7 @@ class Generate(ttk.Frame):
             font='Calibri 14',
             bg="#eeeeee",
             highlightthickness=0)
+        self.entry3.bind("<1>", self.select_path)
 
         self.entry3.place(
             x=102.5240249633789, y=343,
@@ -867,6 +860,8 @@ class Generate(ttk.Frame):
             font='Calibri 14',
             bg="#eeeeee",
             highlightthickness=0)
+        self.entry4.bind("<1>", self.select_file)
+
 
         self.entry4.place(
             x=437.5240249633789, y=270,
@@ -933,7 +928,7 @@ class Generate(ttk.Frame):
             image=self.img1,
             borderwidth=0,
             highlightthickness=0,
-            command=btn_clicked,
+            command=self.gen_button,
             relief="flat")
 
         b1.place(
@@ -994,10 +989,23 @@ class Generate(ttk.Frame):
             height=59)
 
 class Correct(ttk.Frame):
+    def select_path(self, event):
+        self.output_path = str
+        self.output_path = filedialog.askdirectory(title= 'Répertoire de sortie')
+        self.entry0.delete(0, END)
+        self.entry0.insert(0, self.output_path)
+
+    def select_tf(self):
+        self.teacher_sheet = str
+        self.teacher_sheet = filedialog.askopenfilename(title = "Select file",filetypes =(("PNG", "*.png"),("JPG", "*.jpg"),("Image Files","*.*")))
+
+    def select_sf(self):
+        self.students_sheet = tuple
+        self.students_sheet = filedialog.askopenfilenames(title = "Select file",filetypes =(("PNG", "*.png"),("JPG", "*.jpg"),("Image Files","*.*")))
+        self.students_sheet = list(self.students_sheet)
+
     def quitf(self):
         self.quit()
-    def btn_clicked(self):
-        print('Button Clicked')
 
     def __init__(self, container):
         super().__init__(container)
@@ -1020,6 +1028,8 @@ class Correct(ttk.Frame):
             bd=0,
             bg="#d6d4d4",
             highlightthickness=0)
+
+        self.entry0.bind("<1>", self.select_path)
 
         self.entry0.place(
             x=166.23933792114258, y=351,
@@ -1062,7 +1072,7 @@ class Correct(ttk.Frame):
             image=self.img1,
             borderwidth=0,
             highlightthickness=0,
-            command=btn_clicked,
+            command=self.correct_button,
             relief="flat")
 
         b1.place(
@@ -1127,7 +1137,7 @@ class Correct(ttk.Frame):
             image=self.img6,
             borderwidth=0,
             highlightthickness=0,
-            command=btn_clicked,
+            command=self.select_sf,
             relief="flat")
 
         b6.place(
@@ -1140,13 +1150,22 @@ class Correct(ttk.Frame):
             image=self.img7,
             borderwidth=0,
             highlightthickness=0,
-            command=btn_clicked,
+            command=self.select_tf,
             relief="flat")
 
         b7.place(
             x=101, y=174,
             width=280,
             height=128)
+
+    def correct_button(self):
+        ans = m.genAns(self.teacher_sheet)
+        for image in self.students_sheet:
+            try:
+                m.correctExam(image, ans, None, self.output_path)
+            except:
+                pass
+        print('done')
 
 class Welcome(ttk.Frame):
     def btn_clicked(self):

@@ -1,2 +1,0 @@
-# omr-corrector
- 
