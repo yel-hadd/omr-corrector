@@ -9,7 +9,6 @@ import transliteration as tl
 
 r = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
 
-
 def SwitchFrThreeChoices(argument):
     switcher = {
         5: "./model/fr/5x3.jpg",
@@ -30,7 +29,6 @@ def SwitchFrThreeChoices(argument):
         20: "./model/fr/20x3.jpg",
     }
     return switcher.get(argument)
-
 
 def SwitchFrFourChoices(argument):
     switcher = {
@@ -53,7 +51,6 @@ def SwitchFrFourChoices(argument):
     }
     return switcher.get(argument)
 
-
 def SwitchFrFiveChoices(argument):
     switcher = {
         5: "./model/fr/5x5.jpg",
@@ -74,7 +71,6 @@ def SwitchFrFiveChoices(argument):
         20: "./model/fr/20x5.jpg",
     }
     return switcher.get(argument)
-
 
 def SwitchArThreeChoices(argument):
     switcher = {
@@ -97,7 +93,6 @@ def SwitchArThreeChoices(argument):
     }
     return switcher.get(argument)
 
-
 def SwitchArFourChoices(argument):
     switcher = {
         5: "./model/ar/ar5x4.jpg",
@@ -119,7 +114,6 @@ def SwitchArFourChoices(argument):
     }
     return switcher.get(argument)
 
-
 def SwitchArFiveChoices(argument):
     switcher = {
         5: "./model/ar/ar5x5.jpg",
@@ -140,7 +134,6 @@ def SwitchArFiveChoices(argument):
         20: "./model/ar/ar20x5.jpg",
     }
     return switcher.get(argument)
-
 
 def loadAnswerSheet(questions, choices, lang):
     if lang == 'fr' or lang == 'en':
@@ -171,7 +164,6 @@ def loadAnswerSheet(questions, choices, lang):
                     sheet = SwitchArFiveChoices(x)
     return sheet
 
-
 def count_stdnts(workbook):
     wb = opxl.load_workbook(f'{workbook}')
     sh1 = wb['NotesCC']
@@ -184,7 +176,6 @@ def count_stdnts(workbook):
                 number_of_students += 1
             else:
                 return number_of_students
-
 
 def loadstdntinfo(workbook, number_of_students):
     global num, academie, level, semester, session, _class, direction, subject, school, teacher
@@ -227,26 +218,6 @@ def loadstdntinfo(workbook, number_of_students):
     else:
         return -1
 
-
-"""def genQR(order, questions, choices, names, massar_id, _class, num):
-    QR = []
-    qrFilename = []
-    for x in range(0, num):
-        i = 1
-        while os.path.exists("./qr/code%s.jpg" % i):
-            i += 1
-        fileName = ("./qr/code%s.jpg" % i)
-        qrFilename.append(fileName)
-        o = f"{order[x]},{names[x]},{massar_id[x]},{questions},{choices},{_class}"
-        qrCode = qr.make(o)
-        QR.append(qrCode)
-        QR[x].save(fileName)
-        t = test_qr(fileName)
-        while t ==1:
-            pass
-    return qrFilename"""
-
-
 def genQR(order, questions, choices, names, massar_id, _class, num):
     qrFilename = []
     for x in range(0, num):
@@ -256,7 +227,6 @@ def genQR(order, questions, choices, names, massar_id, _class, num):
             box_size=40,
             border=4,
         )
-
         # transliteration
         t1 = tl.only_roman_chars(names[x])
         t2 = tl.only_roman_chars(_class)
@@ -288,7 +258,6 @@ def genQR(order, questions, choices, names, massar_id, _class, num):
         qrFilename.append(fileName)
     return qrFilename
 
-
 def merge(QR, sheet):
     sheet = Image.open(sheet)
     sheetFileName = []
@@ -303,6 +272,53 @@ def merge(QR, sheet):
         sheet.save(fileName)
     return sheetFileName
 
+def gentQR(q, c):
+    qr2 = qr.QRCode(
+        version=3,
+        error_correction=qr.constants.ERROR_CORRECT_H,
+        box_size=40,
+        border=4,
+    )
+    g = [school, _class, teacher, subject, level, semester, direction, academie]
+    v = []
+    for y in g:
+        y = y.translate({ord(c): " " for c in "!@#$%^&*()[]{};:,./<>?\|`~-=_+"})
+        v.append(tl.only_roman_chars(y))
+
+    b = 0
+    for x in range(0, 7):
+        if v[x] == False:
+            b = 1
+            g[x] = tl.transString(g[x], False)
+
+    if b == 1:
+        data = f'{q},{c},{g[0]},{g[1]},{g[2]},{g[3]},{g[4]},{g[5]},{g[6]},{b}'
+    else:
+        data = f'{q},{c},{g[0]},{g[1]},{g[2]},{g[3]},{g[4]},{g[5]},{g[6]}'
+    del v
+    del g
+    qr2.add_data(data, optimize=True)
+    qr2.make(fit=True)
+    jpg = qr2.make_image()
+    jpg.save('./qr/XXXX.jpg')
+    return 0
+
+def teacher_sheet(sheet):
+    sheet = Image.open(sheet)
+    qr = Image.open('./qr/XXXX.jpg').resize((500, 500))
+    header = Image.open('./model/theader.jpg')
+    i = 1
+    while os.path.exists("./sh/t%s.jpg" % i):
+        i += 1
+    fileName = ("./sh/t%s.jpg" % i)
+    sheet.paste(header, (0, 0))
+    sheet.paste(qr, (810, 980))
+    sheet.save(fileName)
+    try:
+        os.remove('./qr/XXXX.jpg')
+    except:
+        return fileName
+    return fileName
 
 def add_header_text(sheetFileName, names, order):
     fontsize = 20
@@ -374,12 +390,10 @@ def add_header_text(sheetFileName, names, order):
         im.save(fileName)
     return list
 
-
 def genPDF(sheetFileName, rep):
     filename = f"{rep}/Exam.pdf"
     with open(filename, "wb") as f:
         f.write(img2pdf.convert(sheetFileName))
-
 
 def clean(qr, sheet, header_sheet):
     for f in qr:
@@ -389,15 +403,15 @@ def clean(qr, sheet, header_sheet):
     for x in header_sheet:
         os.remove(x)
 
-
 def generateExam(questions, choices, workbook, lang, rep):
     sheet = loadAnswerSheet(questions, choices, lang)
     number_of_students = count_stdnts(workbook)
     order, names, massar_id, _class, num = loadstdntinfo(workbook, number_of_students)
+    gentQR(questions, choices)
+    l = teacher_sheet(sheet)
     QR = genQR(order, questions, choices, names, massar_id, _class, num)
     imagelist = merge(QR, sheet)
     imagelist2 = add_header_text(imagelist, names, order)
+    imagelist2.insert(0, l)
     genPDF(imagelist2, rep)
     #clean(QR, imagelist2, imagelist)
-
-generateExam(20, 3, './gg.xlsx', 'fr', '.')

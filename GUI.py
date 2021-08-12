@@ -25,7 +25,7 @@ class Window(tk.Tk):
         container = ttk.Frame(self)
         container.pack()
 
-        self.show_frame(Correct)
+        self.show_frame(Welcome)
 
     def show_frame(self, container):
         if container == Welcome:
@@ -989,6 +989,7 @@ class Generate(ttk.Frame):
             height=59)
 
 class Correct(ttk.Frame):
+
     def select_path(self, event):
         self.output_path = str
         self.output_path = filedialog.askdirectory(title= 'Répertoire de sortie')
@@ -996,7 +997,6 @@ class Correct(ttk.Frame):
         self.entry0.insert(0, self.output_path)
 
     def select_tf(self):
-        self.teacher_sheet = str
         self.teacher_sheet = filedialog.askopenfilename(title = "Select file",filetypes =(("PNG", "*.png"),("JPG", "*.jpg"),("Image Files","*.*")))
 
     def select_sf(self):
@@ -1007,9 +1007,59 @@ class Correct(ttk.Frame):
     def quitf(self):
         self.quit()
 
-    def __init__(self, container):
-        super().__init__(container)
+    def correct_button(self):
+        self.canvas.itemconfigure(self.nbox,
+                                  text='en cours de traitement, veuillez patienter',
+                                  fill='#006400')
+        self.canvas.update()
+        try:
+            ans, sch, cla, tea, sub, lvl, smstr, dir, aca = m.genAns(self.teacher_sheet)
+        except IndexError:
+            messagebox.showerror(title="Error",
+                                 message="Can't scan teacher's sheet, please add another image")
+            self.canvas.itemconfigure(self.nbox, text='')
+            self.canvas.update()
+            return 1
+        except AttributeError:
+            self.canvas.itemconfigure(self.nbox, text='')
+            self.canvas.update()
+            return 1
 
+        if self.teacher_sheet == None:
+            messagebox.showerror(title="Error",
+                                 message="Can't scan teacher's sheet, please add another image")
+            self.canvas.itemconfigure(self.nbox, text='')
+            self.canvas.update()
+        if not self.students_sheet:
+            messagebox.showerror(title="Empty Fields",
+                                 message="Please enter Students sheets")
+            self.canvas.itemconfigure(self.nbox, text='')
+            self.canvas.update()
+            return 1
+        if not self.output_path:
+            messagebox.showerror(title="Empty Fields",
+                                 message="Please select the output path")
+            self.canvas.itemconfigure(self.nbox, text='')
+            self.canvas.update()
+
+        for image in self.students_sheet:
+            try:
+                m.correctExam(image, ans, None, self.output_path)
+            except:
+                pass
+        self.canvas.itemconfigure(self.nbox, text='')
+        self.canvas.update()
+        messagebox.showinfo(title='success',
+                            message='All sheets have been corrected successfully')
+        return 0
+
+    def __init__(self, container):
+        global ran
+        ran = 0
+        super().__init__(container)
+        self.teacher_sheet = None
+        self.students_sheet = None
+        self.output_path = None
         self.canvas = Canvas(
             bg="#ffffff",
             height=500,
@@ -1054,6 +1104,12 @@ class Correct(ttk.Frame):
             fill="#4b4a4a",
             font=("Lato", 13))
 
+        self.nbox = self.canvas.create_text(
+            560, 331.5,
+            text='',
+            fill="#ff0000",
+            font=("Kanit Light", 12))
+
         self.img0 = PhotoImage(file=f"./src/correct/img0.png")
         b0 = Button(
             image=self.img0,
@@ -1067,6 +1123,7 @@ class Correct(ttk.Frame):
             width=162,
             height=39)
 
+        # ! ADD THREADING !#
         self.img1 = PhotoImage(file=f"./src/correct/img1.png")
         b1 = Button(
             image=self.img1,
@@ -1157,15 +1214,6 @@ class Correct(ttk.Frame):
             x=101, y=174,
             width=280,
             height=128)
-
-    def correct_button(self):
-        ans = m.genAns(self.teacher_sheet)
-        for image in self.students_sheet:
-            try:
-                m.correctExam(image, ans, None, self.output_path)
-            except:
-                pass
-        print('done')
 
 class Welcome(ttk.Frame):
     def btn_clicked(self):

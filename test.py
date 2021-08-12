@@ -25,51 +25,74 @@ print(v)"""
 
 def scan_qr(imgx):
     img = cv2.imread(imgx)
-    values = decode(Image.open(imgx))
-    values = values[0].data
-    values = codecs.decode(values)
-    split = values.split(',')
-    print(split[6])
+    widthImg = img.shape[1]
+    heightImg = img.shape[0]
+    d = cv2.QRCodeDetector()
+    values, pp, ss = d.detectAndDecode(img)
+    if len(values) < 1:
+        del pp
+        del ss
+        values = decode(Image.open(imgx))
+        if len(values) < 1:
+            return 1
+        values = values[0].data
+        values = codecs.decode(values)
+        split = values.split(',')
+        if len(split) == 10 and split[9] == '1':
+            questions = int(split[0])
+            choices = int(split[1])
+            school = tl.transString(split[2], True)
+            classe = split[3]
+            teacher = tl.transString(split[4], True)
+            subject = tl.transString(split[5], True)
+            level = tl.transString(split[6], True)
+            semester = tl.transString(split[7], True)
+            direction = tl.transString(split[8], True)
+            academie = tl.transString(split[9], True)
+            del split, values
+        else:
+            questions = split[0]
+            choices = split[1]
+            school = split[2]
+            classe = split[3]
+            teacher = split[4]
+            subject = split[5]
+            level = split[6]
+            semester = split[7]
+            direction = split[8]
+            academie = split[9]
+            del split, values
+            # ques, choice, school, _class, teacher, subject, level, semester, direction, academie
+    else:
+        del pp
+        del ss
+        split = values.split(',')
+        if len(split) == 10 and split[9] == '1':
+            questions = int(split[0])
+            choices = int(split[1])
+            school = tl.transString(split[2], True)
+            classe = split[3]
+            teacher = tl.transString(split[4], True)
+            subject = tl.transString(split[5], True)
+            level = tl.transString(split[6], True)
+            semester = tl.transString(split[7], True)
+            direction = tl.transString(split[8], True)
+            academie = tl.transString(split[9], True)
+            del split, values
+        else:
+            questions = split[0]
+            choices = split[1]
+            school = split[2]
+            classe = split[3]
+            teacher = split[4]
+            subject = split[5]
+            level = split[6]
+            semester = split[7]
+            direction = split[8]
+            academie = split[9]
+            del split, values
+
     return 0
 
-"""    if len(split) > 5:
-        if split[5] == 'Name Tra':
-            name = tl.transString(split[1], True)  # !!!!!!!
-            order = split[0]
-            massar = split[2]
-            questions = int(split[3])
-            choices = int(split[4])
-            classe = split[5]
-            nfo = [order, name, massar, classe]
-        elif split[5] == 'Classe Tra':
-            classe = tl.transString(split[5], True)  # !!!!!!!
-            name = split[1]
-            order = split[0]
-            massar = split[2]
-            questions = int(split[3])
-            choices = int(split[4])
-            nfo = [order, name, massar, classe]
-        elif split[5] == 'Both Tra':
-            classe = tl.transString(split[5], True)
-            name = tl.transString(split[1], True)
-            order = split[0]
-            massar = split[2]
-            questions = int(split[3])
-            choices = int(split[4])
-            nfo = [order, name, massar, classe]
-    else:
-        order = split[0]
-        name = split[1]
-        massar = split[2]
-        questions = int(split[3])
-        choices = int(split[4])
-        classe = split[5]
-        nfo = [order, name, massar, classe]"""
 
 
-
-
-g = scan_qr('./sh/sh1.jpg')
-print(g)
-
-#tl.transString('b$rY', tl.only_roman_chars('b$rY')

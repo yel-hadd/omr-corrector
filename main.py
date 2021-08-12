@@ -16,7 +16,6 @@ def genAns(imga):
     d = cv2.QRCodeDetector()
     values, pp, ss = d.detectAndDecode(img)
     if len(values) < 1:
-        print('z')
         del pp
         del ss
         values = decode(Image.open(imga))
@@ -25,16 +24,59 @@ def genAns(imga):
         values = values[0].data
         values = codecs.decode(values)
         split = values.split(',')
-        questions = int(split[3])
-        choices = int(split[4])
+        if len(split) == 10 and split[9] == '1':
+            questions = int(split[0])
+            choices = int(split[1])
+            school = tl.transString(split[2], True)
+            classe = split[3]
+            teacher = tl.transString(split[4], True)
+            subject = tl.transString(split[5], True)
+            level = tl.transString(split[6], True)
+            semester = tl.transString(split[7], True)
+            direction = tl.transString(split[8], True)
+            academie = tl.transString(split[9], True)
+            del split, values
+        else:
+            questions = split[0]
+            choices = split[1]
+            school = split[2]
+            classe = split[3]
+            teacher = split[4]
+            subject = split[5]
+            level = split[6]
+            semester = split[7]
+            direction = split[8]
+            academie = split[9]
+            del split, values
+            # ques, choice, school, _class, teacher, subject, level, semester, direction, academie
     else:
         del pp
         del ss
         split = values.split(',')
-        questions = int(split[3])
-        choices = int(split[4])
-        del split
-
+        if len(split) == 10 and split[9] == '1':
+            questions = int(split[0])
+            choices = int(split[1])
+            school = tl.transString(split[2], True)
+            classe = split[3]
+            teacher = tl.transString(split[4], True)
+            subject = tl.transString(split[5], True)
+            level = tl.transString(split[6], True)
+            semester = tl.transString(split[7], True)
+            direction = tl.transString(split[8], True)
+            academie = tl.transString(split[9], True)
+            del split, values
+        else:
+            questions = split[0]
+            choices = split[1]
+            school = split[2]
+            classe = split[3]
+            teacher = split[4]
+            subject = split[5]
+            level = split[6]
+            semester = split[7]
+            direction = split[8]
+            academie = split[9]
+            del split, values
 
     imgContours = img.copy()
     imgBiggestContours = img.copy()
@@ -52,15 +94,12 @@ def genAns(imga):
     rectCon = utils.rectContours(contours)
     biggestContour = utils.getCornerPoints(rectCon[0]) #rectangle de marquage
     gradePoints = utils.getCornerPoints(rectCon[1])
-    qrPoints = utils.getCornerPoints(rectCon[2]) # rectangle de QR
 
     if biggestContour.size != 0 and gradePoints.size != 0:
         cv2.drawContours(imgBiggestContours, biggestContour, -1, (0, 255, 0), 20)
         cv2.drawContours(imgBiggestContours, gradePoints, -5, (0, 0, 255), 20)
-        cv2.drawContours(imgBiggestContours, qrPoints, -5, (0, 0, 255), 20)
         biggestContour = utils.reorder(biggestContour)
         gradePoints = utils.reorder(gradePoints)
-        qrPoints = utils.reorder(qrPoints)
 
         pt1 = np.float32(biggestContour)
         pt2 = np.float32([[0, 0], [widthImg, 0], [0, heightImg], [widthImg, heightImg]])
@@ -71,13 +110,6 @@ def genAns(imga):
         ptg2 = np.float32([[0, 0], [325, 0], [0, 150], [325, 150]])
         matrixG = cv2.getPerspectiveTransform(ptg1, ptg2)
         imgGradeDisplay = cv2.warpPerspective(img, matrixG, (325, 150))
-
-
-        ptq1 = np.float32(qrPoints)
-        ptq2 = np.float32([[0, 0], [500, 0], [0, 500], [500, 500]])
-        matrixG = cv2.getPerspectiveTransform(ptq1, ptq2)
-        imgQrDisplay = cv2.warpPerspective(img, matrixG, (500, 500))
-        d = cv2.QRCodeDetector()
 
         # apply threshold
         imgWarpGray = cv2.cvtColor(imgWarpColored, cv2.COLOR_BGR2GRAY)
@@ -104,7 +136,10 @@ def genAns(imga):
             if countC == choices:
                 countR += 1
                 countC = 0
-    return Full
+        cv2.imwrite('X.jpg', imgBiggestContours)
+        return Full, school, classe, teacher, subject, level, semester, direction, academie
+    else:
+        return 0, 0, 0, 0, 0, 0, 0, 0, 0
 
 def correctExam(imgx, ans, bareme,rep):
     img = cv2.imread(imgx)
@@ -232,7 +267,6 @@ def correctExam(imgx, ans, bareme,rep):
         ptq2 = np.float32([[0, 0], [500, 0], [0, 500], [500, 500]])
         matrixG = cv2.getPerspectiveTransform(ptq1, ptq2)
         imgQrDisplay = cv2.warpPerspective(img, matrixG, (500, 500))
-        d = cv2.QRCodeDetector()
 
         # apply threshold
         imgWarpGray = cv2.cvtColor(imgWarpColored, cv2.COLOR_BGR2GRAY)
@@ -303,3 +337,6 @@ def correctExam(imgx, ans, bareme,rep):
             wr = csv.writer(fp, dialect='excel')
             wr.writerow(nfo)
     return 0
+
+def genReport(imgf, csv):
+    print(None)
