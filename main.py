@@ -9,6 +9,7 @@ from PIL import Image
 import transliteration as tl
 import codecs
 
+# why not thread windows
 def genAns(imga):
     img = cv2.imread(imga)
     widthImg = img.shape[1]
@@ -24,7 +25,9 @@ def genAns(imga):
         values = values[0].data
         values = codecs.decode(values)
         split = values.split(',')
-        if len(split) == 10 and split[9] == '1':
+        split[10] = int(split[10])
+        if len(split) == 15 and split[10] == 1:
+            # [q, c, school, _class, teacher, subject, level, semester, direction, academie]
             questions = int(split[0])
             choices = int(split[1])
             school = tl.transString(split[2], True)
@@ -35,10 +38,14 @@ def genAns(imga):
             semester = tl.transString(split[7], True)
             direction = tl.transString(split[8], True)
             academie = tl.transString(split[9], True)
+            nbr = int(split[11])
+            ch1 = split[12]
+            ch2 = split[13]
+            ch3 = split[14]
             del split, values
-        else:
-            questions = split[0]
-            choices = split[1]
+        elif len(split) == 15 and split[10] == 0:
+            questions = int(split[0])
+            choices = int(split[1])
             school = split[2]
             classe = split[3]
             teacher = split[4]
@@ -47,13 +54,18 @@ def genAns(imga):
             semester = split[7]
             direction = split[8]
             academie = split[9]
+            nbr = int(split[11])
+            ch1 = split[12]
+            ch2 = split[13]
+            ch3 = split[14]
             del split, values
-            # ques, choice, school, _class, teacher, subject, level, semester, direction, academie
     else:
         del pp
         del ss
         split = values.split(',')
-        if len(split) == 10 and split[9] == '1':
+        split[10] = int(split[10])
+        if len(split) == 15 and split[10] == 1:
+            # [q, c, school, _class, teacher, subject, level, semester, direction, academie]
             questions = int(split[0])
             choices = int(split[1])
             school = tl.transString(split[2], True)
@@ -64,10 +76,14 @@ def genAns(imga):
             semester = tl.transString(split[7], True)
             direction = tl.transString(split[8], True)
             academie = tl.transString(split[9], True)
+            nbr = int(split[11])
+            ch1 = split[12]
+            ch2 = split[13]
+            ch3 = split[14]
             del split, values
-        else:
-            questions = split[0]
-            choices = split[1]
+        elif len(split) == 15 and split[10] == 0:
+            questions = int(split[0])
+            choices = int(split[1])
             school = split[2]
             classe = split[3]
             teacher = split[4]
@@ -76,6 +92,10 @@ def genAns(imga):
             semester = split[7]
             direction = split[8]
             academie = split[9]
+            nbr = int(split[11])
+            ch1 = split[12]
+            ch2 = split[13]
+            ch3 = split[14]
             del split, values
 
     imgContours = img.copy()
@@ -137,14 +157,15 @@ def genAns(imga):
                 countR += 1
                 countC = 0
         cv2.imwrite('X.jpg', imgBiggestContours)
-        return Full, school, classe, teacher, subject, level, semester, direction, academie
+        return Full, school, classe, teacher, subject, level, semester, direction, academie, nbr, ch1, ch2, ch3
     else:
-        return 0, 0, 0, 0, 0, 0, 0, 0, 0
+        return 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
-def correctExam(imgx, ans, bareme,rep):
+def correctExam(imgx, ans, bareme, rep, nbrc, ch1, ch2, ch3):
     img = cv2.imread(imgx)
     d = cv2.QRCodeDetector()
     values, pp, ss = d.detectAndDecode(img)
+
     if len(values) < 1:
         del pp
         del ss
@@ -179,6 +200,7 @@ def correctExam(imgx, ans, bareme,rep):
                 questions = int(split[3])
                 choices = int(split[4])
                 nfo = [order, name, massar, classe]
+
     if len(values) > 1:
         split = values.split(',')
         if len(split) > 6:
@@ -219,6 +241,27 @@ def correctExam(imgx, ans, bareme,rep):
         bareme = []
         for x in range(0, questions):
             bareme.append(1)
+
+    nchapters = int(nbrc)
+    chap1 = ch1
+    chap2 = ch2
+    chap3 = ch3
+
+    if nbrc == 0:
+        chap1 = None
+        chap2 = None
+        chap3 = None
+    else:
+        if chap1 == 'None':
+            chap1 = None
+        if chap2 == 'None':
+            chap2 = None
+        if chap3 == 'None':
+            chap3 = None
+
+    a = ((chap1 is not None) and (chap2 is None) and (chap3 is None) is True)
+    b = ((chap1 and chap2 is not None) and (chap3 is None)) is True
+    c = ((chap1 and chap2 and chap3) is not None) is True
 
     grading = int
     score = float
@@ -322,21 +365,163 @@ def correctExam(imgx, ans, bareme,rep):
             score = np.sum(grading, axis=1)
             sumscore = float(sum(score))
 
-        nfo.append(sumscore)
+        if nchapters == 1:
+            m1 = ch1.split(':')
 
-        if os.path.isdir(rep):
-            path = f"{rep}/résultats_{classe}.csv"
-        else:
-            os.mkdir(rep)
-            path = f"{rep}/résultats_{classe}.csv"
+            m1[1] = int(m1[1])
 
-        if not os.path.isfile(path):
-            copyfile('./src/output.csv', path)
+            if int(m1[1]) > questions:
+                pass
 
-        with open(path, "a", encoding="utf-8", newline='\n') as fp:
-            wr = csv.writer(fp, dialect='excel')
-            wr.writerow(nfo)
-    return 0
+            hx = score
 
-def genReport(imgf, csv):
-    print(None)
+            ch1_g = hx[:int(m1[1])]
+            ch1_s = sum(ch1_g)
+
+            nfo.append(ch1_s)
+            nfo.append(sumscore)
+
+            headers = ["Numéro d'ordre", 'Nom Complet','Code Massar','Classe',f'{m1[0]}','Note']
+
+            if os.path.isdir(rep):
+                path = f"{rep}/résultats_{classe}_1c.csv"
+            else:
+                os.mkdir(rep)
+                path = f"{rep}/résultats_{classe}_1c.csv"
+
+            if not os.path.isfile(path):
+                open(path, 'a').close()
+
+            with open(path, "r", encoding="utf-8", newline='') as fp:
+                g = fp.readline()
+                g = len(g)
+
+            with open(path, "a", encoding="utf-8", newline='') as fp:
+                wr = csv.writer(fp, dialect='excel')
+                if g != 0:
+                    wr.writerow(nfo)
+                else:
+                    wr.writerow(headers)
+                    wr.writerow(nfo)
+            return 0
+
+        elif nchapters == 2:
+            m1 = ch1.split(':')
+            m2 = ch2.split(':')
+
+            m1[1] = int(m1[1])
+            m2[1] = int(m2[1])
+
+            if (m1[1] + m2[1]) > questions:
+                pass
+
+            hx = score
+
+            ch1_g = hx[:int(m1[1])]
+            ch1_s = sum(ch1_g)
+            hx = hx[int(m1[1]):]
+
+            ch2_g = hx[:int(m2[1])]
+            ch2_s = sum(ch2_g)
+            del hx
+
+            nfo.append(ch1_s)
+            nfo.append(ch2_s)
+            nfo.append(sumscore)
+
+            headers = ["Numéro d'ordre", 'Nom Complet', 'Code Massar', 'Classe', f'{m1[0]}', f'{m2[0]}', 'Note']
+
+            if os.path.isdir(rep):
+                path = f"{rep}/résultats_{classe}_2c.csv"
+            else:
+                os.mkdir(rep)
+                path = f"{rep}/résultats_{classe}_2c.csv"
+
+            if not os.path.isfile(path):
+                open(path, 'a').close()
+
+            with open(path, "r", encoding="utf-8", newline='') as fp:
+                g = fp.readline()
+                g = len(g)
+
+            with open(path, "a", encoding="utf-8", newline='') as fp:
+                wr = csv.writer(fp, dialect='excel')
+                if g != 0:
+                    wr.writerow(nfo)
+                else:
+                    wr.writerow(headers)
+                    wr.writerow(nfo)
+            return 0
+
+        elif nchapters == 3:
+            m1 = ch1.split(':')
+            m2 = ch2.split(':')
+            m3 = ch3.split(':')
+
+            m1[1] = int(m1[1])
+            m2[1] = int(m2[1])
+            m3[1] = int(m3[1])
+
+            if (m1[1] + m2[1] + m3[1]) > questions:
+                pass
+
+            hx = score
+
+            ch1_g = hx[:int(m1[1])]
+            ch1_s = sum(ch1_g)
+            hx = hx[int(m1[1]):]
+
+            ch2_g = hx[:int(m2[1])]
+            ch2_s = sum(ch2_g)
+            hx = hx[int(m2[1]):]
+
+            ch3_g = hx[:int(m3[1])]
+            ch3_s = sum(ch3_g)
+            del hx
+
+            nfo.append(ch1_s)
+            nfo.append(ch2_s)
+            nfo.append(ch3_s)
+            nfo.append(sumscore)
+
+            headers = ["Numéro d'ordre", 'Nom Complet', 'Code Massar', 'Classe', f'{m1[0]}', f'{m2[0]}',f'{m3[0]}', 'Note']
+
+            if os.path.isdir(rep):
+                path = f"{rep}/résultats_{classe}_3c.csv"
+            else:
+                os.mkdir(rep)
+                path = f"{rep}/résultats_{classe}_3c.csv"
+
+            if not os.path.isfile(path):
+                open(path, 'a').close()
+
+            with open(path, "r", encoding="utf-8", newline='') as fp:
+                g = fp.readline()
+                g = len(g)
+
+            with open(path, "a", encoding="utf-8", newline='') as fp:
+                wr = csv.writer(fp, dialect='excel')
+                if g != 0:
+                    wr.writerow(nfo)
+                else:
+                    wr.writerow(headers)
+                    wr.writerow(nfo)
+            return 0
+
+        elif nchapters == 0:
+            nfo.append(sumscore)
+            if os.path.isdir(rep):
+                path = f"{rep}/résultats_{classe}.csv"
+            else:
+                os.mkdir(rep)
+                path = f"{rep}/résultats_{classe}.csv"
+
+            if not os.path.isfile(path):
+                copyfile('./src/output.csv', path)
+
+            with open(path, "a", encoding="utf-8", newline='\n') as fp:
+                wr = csv.writer(fp, dialect='excel')
+                wr.writerow(nfo)
+            return 0
+    else:
+        return 1

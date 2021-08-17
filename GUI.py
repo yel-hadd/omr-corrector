@@ -6,6 +6,9 @@ import main as m
 import auth
 import captcha
 import generateExam as gen
+from shutil import copyfile
+import random
+
 
 try:
     from ctypes import windll
@@ -25,9 +28,9 @@ class Window(tk.Tk):
         container = ttk.Frame(self)
         container.pack()
 
-        self.show_frame(Welcome)
+        self.show_frame(Correct,None,None,None,None,None)
 
-    def show_frame(self, container):
+    def show_frame(self, container, a, b, c, d, e):
         if container == Welcome:
             Welcome(self).pack()
         elif container == Home:
@@ -44,6 +47,8 @@ class Window(tk.Tk):
             Correct(self).pack()
         elif container == Contact:
             Contact(self).pack()
+        elif container == Chapters:
+            Chapters(self, a, b, c, d, e).pack()
 
 class Home(ttk.Frame):
     def quitf(self):
@@ -69,7 +74,7 @@ class Home(ttk.Frame):
             image=self.img0,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: container.show_frame(Generate),
+            command=lambda: container.show_frame(Generate,None,None,None,None,None),
             relief="flat")
 
         b0.place(
@@ -82,7 +87,7 @@ class Home(ttk.Frame):
             image=self.img1,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: container.show_frame(Correct),
+            command=lambda: container.show_frame(Correct,None,None,None,None,None),
             relief="flat")
 
         b1.place(
@@ -108,7 +113,7 @@ class Home(ttk.Frame):
             image=self.img3,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: container.show_frame(Contact),
+            command=lambda: container.show_frame(Contact,None,None,None,None,None),
             relief="flat")
 
         b3.place(
@@ -192,7 +197,6 @@ class Home(ttk.Frame):
             height=259)
 
 class Login(ttk.Frame):
-
     def __init__(self, container):
         super().__init__(container)
         self.loadcaptcha()
@@ -291,7 +295,7 @@ class Login(ttk.Frame):
             image=self.img0,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: container.show_frame(Signup),
+            command=lambda: container.show_frame(Signup,None,None,None,None,None),
             relief="flat")
 
         b0.place(
@@ -317,7 +321,7 @@ class Login(ttk.Frame):
             image=self.img2,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: container.show_frame(Welcome),
+            command=lambda: container.show_frame(Welcome,None,None,None,None,None),
             relief="flat")
 
         b2.place(
@@ -330,7 +334,7 @@ class Login(ttk.Frame):
             image=self.img3,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: container.show_frame(Forgot_password),
+            command=lambda: container.show_frame(Forgot_password,None,None,None,None,None),
             relief="flat")
 
         b3.place(
@@ -392,7 +396,7 @@ class Login(ttk.Frame):
                 self.canvas.itemconfigure(self.cbox, text=question)
             elif str == 1:
                 self.canvas.itemconfigure(self.nbox, text="Successfully logged in!", fill='#008000')
-                container.show_frame(Home)
+                container.show_frame(Home,None,None,None,None,None)
             elif str == 2:
                 self.canvas.itemconfigure(self.nbox, text="Invalid email or password")
                 self.loadcaptcha()
@@ -422,7 +426,7 @@ class Signup(ttk.Frame):
             image=self.img0,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: container.show_frame(Login),
+            command=lambda: container.show_frame(Login,None,None,None,None,None),
             relief="flat")
 
         b0.place(
@@ -448,7 +452,7 @@ class Signup(ttk.Frame):
             image=self.img2,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: container.show_frame(Welcome),
+            command=lambda: container.show_frame(Welcome,None,None,None,None,None),
             relief="flat")
 
         b2.place(
@@ -461,7 +465,7 @@ class Signup(ttk.Frame):
             image=self.img3,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: container.show_frame(Login),
+            command=lambda: container.show_frame(Login,None,None,None,None,None),
             relief="flat")
 
         b3.place(
@@ -671,7 +675,7 @@ class Forgot_password(ttk.Frame):
             image=self.img0,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: container.show_frame(Login),
+            command=lambda: container.show_frame(Login,None,None,None,None,None),
             relief="flat")
 
         b0.place(
@@ -684,7 +688,7 @@ class Forgot_password(ttk.Frame):
             image=self.img1,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: container.show_frame(Signup),
+            command=lambda: container.show_frame(Signup,None,None,None,None,None),
             relief="flat")
 
         b1.place(
@@ -697,7 +701,7 @@ class Forgot_password(ttk.Frame):
             image=self.img2,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: container.show_frame(Welcome),
+            command=lambda: container.show_frame(Welcome,None,None,None,None,None),
             relief="flat")
 
         b2.place(
@@ -758,20 +762,22 @@ class Generate(ttk.Frame):
         self.entry4.insert(0, self.file_path)
 
     def gen_button(self):
-        question = int(self.entry0.get())
-        choice = int(self.entry1.get())
-        lang = str(self.entry2.get())
-        excel = str(self.entry4.get())
-        output = str(self.entry3.get())
-        gen.generateExam(question, choice, excel, lang, output)
-        print('done')
+        self.question = int(self.entry0.get())
+        self.choice = int(self.entry1.get())
+        self.lang = str(self.entry2.get())
+        self.excel = str(self.entry4.get())
+        self.output = str(self.entry3.get())
+        if self.chap_cb.get() == False:
+            gen.generateExam(self.question, self.choice, self.excel, self.lang, self.output, None, None, None, 0)
+        elif self.chap_cb.get() == True:
+            Window.show_frame(self, Chapters, self.question, self.choice, self.excel, self.lang,
+                              self.output)
 
     def quitf(self):
         self.quit()
 
     def btn_clicked(self):
         print('Hi')
-
 
     def __init__(self, container):
         super().__init__(container)
@@ -784,6 +790,7 @@ class Generate(ttk.Frame):
             highlightthickness=0,
             relief="ridge")
         self.canvas.place(x=0, y=0)
+        self.chap_cb = BooleanVar()
 
         self.entry0_img = PhotoImage(file=f"./src/generate/img_textBox0.png")
         entry0_bg = self.canvas.create_image(
@@ -862,7 +869,6 @@ class Generate(ttk.Frame):
             highlightthickness=0)
         self.entry4.bind("<1>", self.select_file)
 
-
         self.entry4.place(
             x=437.5240249633789, y=270,
             width=266.9519500732422,
@@ -899,6 +905,12 @@ class Generate(ttk.Frame):
             font=("Kanit Light", 16))
 
         self.canvas.create_text(
+            709, 356,
+            text="Ajouter des chapitres",
+            fill="#000000",
+            font=("Kanit Light", 11))
+
+        self.canvas.create_text(
             402.0, 102,
             text="générer les feuilles d'examen",
             fill="#000000",
@@ -915,7 +927,7 @@ class Generate(ttk.Frame):
             image=self.img0,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: container.show_frame(Home),
+            command=lambda: container.show_frame(Home,None,None,None,None,None),
             relief="flat")
 
         b0.place(
@@ -941,7 +953,7 @@ class Generate(ttk.Frame):
             image=self.img2,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: container.show_frame(Home),
+            command=lambda: container.show_frame(Home,None,None,None,None,None),
             relief="flat")
 
         b2.place(
@@ -954,7 +966,7 @@ class Generate(ttk.Frame):
             image=self.img3,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: container.show_frame(Correct),
+            command=lambda: container.show_frame(Correct,None,None,None,None,None),
             relief="flat")
 
         b3.place(
@@ -988,8 +1000,331 @@ class Generate(ttk.Frame):
             width=624,
             height=59)
 
-class Correct(ttk.Frame):
+        self.cbu1 = Checkbutton(self.canvas, variable=self.chap_cb, bg='#00766F', onvalue=True, offvalue=False)
+        self.cbu1.place(x=607, y=347)
 
+class Chapters(ttk.Frame):
+    def quitg(self):
+        self.quit()
+    def __init__(self, container, question, choice, excel, lang, output):
+        super().__init__(container)
+
+        self.canvas2 = Canvas(
+            bg="#ffffff",
+            height=500,
+            width=800,
+            bd=0,
+            highlightthickness=0,
+            relief="ridge")
+        self.canvas2.place(x=0, y=0)
+
+        self.background_img = PhotoImage(file=f"./src/chapters/background.png")
+        self.background = self.canvas2.create_image(
+            400.0, 250.0,
+            image=self.background_img)
+
+        self.canvas2.create_text(
+            377.0, 167.5,
+            text="Titre du 1er chapitre",
+            fill="#000000",
+            font=("Kanit Light", int(13.17255973815918)))
+
+        self.canvas2.create_text(
+            377.0, 251.5,
+            text="Titre du 2eme chapitre",
+            fill="#000000",
+            font=("Kanit Light", int(13.17255973815918)))
+
+        self.canvas2.create_text(
+            342.0, 335.5,
+            text="Titre du 3eme chapitre",
+            fill="#000000",
+            font=("Kanit Light", int(13.17255973815918)))
+
+        self.canvas2.create_text(
+            585.5, 167.0,
+            text="Nombre des questions",
+            fill="#000000",
+            font=("Kanit Light", int(13.17255973815918)))
+
+        self.canvas2.create_text(
+            585.5, 251.0,
+            text="Nombre des questions",
+            fill="#000000",
+            font=("Kanit Light", int(13.17255973815918)))
+
+        self.canvas2.create_text(
+            585.5, 335.0,
+            text="Nombre des questions",
+            fill="#000000",
+            font=("Kanit Light", int(13.17255973815918)))
+
+        self.canvas2.create_text(
+            440.5, 416.0,
+            text="Ajouter un Barème personalisé",
+            fill="#000000",
+            font=("Kanit Light", int(13.17255973815918)))
+
+        self.canvas2.create_text(
+            207.0, 190.5,
+            text="Chapitre 1:",
+            fill="#000000",
+            font=("Kanit SemiBold", int(13.17255973815918)))
+
+        self.canvas2.create_text(
+            211.5, 274.5,
+            text="Chapitre 2:",
+            fill="#000000",
+            font=("Kanit SemiBold", int(13.17255973815918)))
+
+        self.canvas2.create_text(
+            207.0, 358.5,
+            text="Chapitre 3:",
+            fill="#000000",
+            font=("Kanit SemiBold", int(13.17255973815918)))
+
+        self.im0 = PhotoImage(file=f"./src/chapters/img0.png")
+        bu0 = Button(
+            image=self.im0,
+            borderwidth=0,
+            highlightthickness=0,
+            command=btn_clicked,
+            relief="flat")
+
+        bu0.place(
+            x=66, y=31,
+            width=160,
+            height=38)
+
+        self.im1 = PhotoImage(file=f"./src/chapters/img1.png")
+        bu1 = Button(
+            image=self.im1,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: container.show_frame(Home,None,None,None,None,None),
+            relief="flat")
+
+        bu1.place(
+            x=633, y=38,
+            width=25,
+            height=25)
+
+        self.im2 = PhotoImage(file=f"./src/chapters/img2.png")
+        bu2 = Button(
+            image=self.im2,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: container.show_frame(Correct,None,None,None,None,None),
+            relief="flat")
+
+        bu2.place(
+            x=669, y=38,
+            width=25,
+            height=25)
+
+        self.im3 = PhotoImage(file=f"./src/chapters/img3.png")
+        bu3 = Button(
+            image=self.im3,
+            borderwidth=0,
+            highlightthickness=0,
+            command=self.quitg,
+            relief="flat")
+
+        bu3.place(
+            x=705, y=38,
+            width=25,
+            height=25)
+
+        self.ent0_img = PhotoImage(file=f"./src/chapters/img_textBox0.png")
+        ent0_bg = self.canvas2.create_image(
+            374.5, 198.5,
+            image=self.ent0_img)
+
+        self.ent0 = Entry(
+            bd=0,
+            bg="#eeeeee",
+            highlightthickness=0)
+
+        self.ent0.place(
+            x=287.0116558074951, y=183,
+            width=174.97668838500977,
+            height=29)
+
+        self.ent1_img = PhotoImage(file=f"./src/chapters/img_textBox1.png")
+        self.ent1_bg = self.canvas2.create_image(
+            374.5, 282.5,
+            image=self.ent1_img)
+
+        self.ent1 = Entry(
+            bd=0,
+            bg="#eeeeee",
+            highlightthickness=0)
+
+        self.ent1.place(
+            x=287.0116558074951, y=267,
+            width=174.97668838500977,
+            height=29)
+
+        self.ent2_img = PhotoImage(file=f"./src/chapters/img_textBox2.png")
+        self.ent2_bg = self.canvas2.create_image(
+            374.5, 366.5,
+            image=self.ent2_img)
+
+        self.ent2 = Entry(
+            bd=0,
+            bg="#eeeeee",
+            highlightthickness=0)
+
+        self.ent2.place(
+            x=287.0116558074951, y=351,
+            width=174.97668838500977,
+            height=29)
+
+        self.ent3_img = PhotoImage(file=f"./src/chapters/img_textBox3.png")
+        self.ent3_bg = self.canvas2.create_image(
+            587.0, 198.5,
+            image=self.ent3_img)
+
+        self.ent3 = Entry(
+            bd=0,
+            bg="#eeeeee",
+            highlightthickness=0)
+
+        self.ent3.place(
+            x=528.0116558074951, y=183,
+            width=117.97668838500977,
+            height=29)
+
+        self.ent4_img = PhotoImage(file=f"./src/chapters/img_textBox4.png")
+        self.ent4_bg = self.canvas2.create_image(
+            587.0, 282.5,
+            image=self.ent4_img)
+
+        self.ent4 = Entry(
+            bd=0,
+            bg="#eeeeee",
+            highlightthickness=0)
+
+        self.ent4.place(
+            x=528.0116558074951, y=267,
+            width=117.97668838500977,
+            height=29)
+
+        self.ent5_img = PhotoImage(file=f"./src/chapters/img_textBox5.png")
+        ent5_bg = self.canvas2.create_image(
+            587.0, 366.5,
+            image=self.ent5_img)
+
+        self.ent5 = Entry(
+            bd=0,
+            bg="#eeeeee",
+            highlightthickness=0)
+
+        self.ent5.place(
+            x=528.0116558074951, y=351,
+            width=117.97668838500977,
+            height=29)
+
+        self.im4 = PhotoImage(file=f"./src/chapters/img4.png")
+        b4 = Button(
+            image=self.im4,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: self.generate_chap_btn(question, choice, excel, lang, output),
+            relief="flat")
+
+        b4.place(
+            x=408, y=440,
+            width=136,
+            height=34)
+
+        self.im5 = PhotoImage(file=f"./src/chapters/img5.png")
+        self.bu5 = Button(
+            image=self.im5,
+            borderwidth=0,
+            highlightthickness=0,
+            command=self.quitg,
+            relief="flat")
+
+        self.bu5.place(
+            x=255, y=440,
+            width=136,
+            height=34)
+
+        self.canvas2.create_text(
+            399.0, 87.0,
+            text="Ajout Des Chapitres",
+            fill="#000000",
+            font=("Kanit Regular", int(28.404987335205078)))
+
+        self.canvas2.create_text(
+            399.5, 129.0,
+            text="un moyen rapide et efficace pour générer les feuilles d'examen",
+            fill="#4b4a4a",
+            font=("Lato SemiBold", int(13.300724983215332)))
+
+        self.ch1c = BooleanVar()
+        self.ch2c = BooleanVar()
+        self.ch3c = BooleanVar()
+        self.bareme_c = BooleanVar()
+
+        self.cbu1 = Checkbutton(self.canvas2, variable=self.ch1c, bg='white', onvalue=True, offvalue=False,
+                                command=btn_clicked)
+
+        self.cbu1.place(x=136, y=180)
+
+        cbu2 = Checkbutton(self.canvas2, variable=self.ch2c, bg='white', onvalue=True, offvalue=False,
+                           command=btn_clicked)
+
+        cbu2.place(x=137, y=265)
+
+        cbu3 = Checkbutton(self.canvas2, variable=self.ch3c, bg='white', onvalue=True, offvalue=False,
+                           command=btn_clicked)
+
+        cbu3.place(x=137, y=345)
+
+        cbb = Checkbutton(self.canvas2, variable=self.bareme_c, bg='white', onvalue=True, offvalue=False,
+                          command=btn_clicked)
+
+        cbb.place(x=286, y=404)
+
+        return
+
+    def generate_chap_btn(self, question, choice, excel, lang, output):
+        quest = question
+        choi = choice
+        xlsx = excel
+        language = lang
+        out = output
+        c1 = self.ch1c.get()
+        c2 = self.ch2c.get()
+        c3 = self.ch3c.get()
+        b = self.bareme_c.get()
+        if (c1 == True) and (c2 != True) and (c3!= True):
+            self.ch1 = f'{self.ent0.get()}:{self.ent3.get()}'
+            self.ch2 = None
+            self.ch3 = None
+            self.chapters = 1
+        elif (c1 == True) and (c2 == True) and (c3!= True):
+            self.ch1 = f'{self.ent0.get()}:{self.ent3.get()}'
+            self.ch2 = f'{self.ent1.get()}:{self.ent4.get()}'
+            self.ch3 = None
+            self.chapters = 2
+        elif (c1 == True) and (c2 == True) and (c3 == True):
+            self.ch1 = f'{self.ent0.get()}:{self.ent3.get()}'
+            self.ch2 = f'{self.ent1.get()}:{self.ent4.get()}'
+            self.ch3 = f'{self.ent2.get()}:{self.ent5.get()}'
+            self.chapters = 3
+        else:
+            self.ch1 = None
+            self.ch2 = None
+            self.ch3 = None
+            self.chapters = 0
+
+        gen.generateExam(quest, choi, xlsx, language, out,
+                         self.ch1, self.ch2, self.ch3, self.chapters)
+
+class Correct(ttk.Frame):
     def select_path(self, event):
         self.output_path = str
         self.output_path = filedialog.askdirectory(title= 'Répertoire de sortie')
@@ -1012,8 +1347,9 @@ class Correct(ttk.Frame):
                                   text='en cours de traitement, veuillez patienter',
                                   fill='#006400')
         self.canvas.update()
+
         try:
-            ans, sch, cla, tea, sub, lvl, smstr, dir, aca = m.genAns(self.teacher_sheet)
+            ans, sch, cla, tea, sub, lvl, smstr, dir, aca, nbrc, chapt1, chapt2, chap3  = m.genAns(self.teacher_sheet)
         except IndexError:
             messagebox.showerror(title="Error",
                                  message="Can't scan teacher's sheet, please add another image")
@@ -1044,7 +1380,7 @@ class Correct(ttk.Frame):
 
         for image in self.students_sheet:
             try:
-                m.correctExam(image, ans, None, self.output_path)
+                m.correctExam(image, ans, None, self.output_path, nbrc, chapt1, chapt2, chap3)
             except:
                 pass
         self.canvas.itemconfigure(self.nbox, text='')
@@ -1054,12 +1390,7 @@ class Correct(ttk.Frame):
         return 0
 
     def __init__(self, container):
-        global ran
-        ran = 0
         super().__init__(container)
-        self.teacher_sheet = None
-        self.students_sheet = None
-        self.output_path = None
         self.canvas = Canvas(
             bg="#ffffff",
             height=500,
@@ -1115,7 +1446,7 @@ class Correct(ttk.Frame):
             image=self.img0,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: container.show_frame(Home),
+            command=lambda: container.show_frame(Home,None,None,None,None,None),
             relief="flat")
 
         b0.place(
@@ -1142,7 +1473,7 @@ class Correct(ttk.Frame):
             image=self.img2,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: container.show_frame(Home),
+            command=lambda: container.show_frame(Home,None,None,None,None,None),
             relief="flat")
 
         b2.place(
@@ -1155,7 +1486,7 @@ class Correct(ttk.Frame):
             image=self.img3,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: container.show_frame(Generate),
+            command=lambda: container.show_frame(Generate,None,None,None,None,None),
             relief="flat")
 
         b3.place(
@@ -1239,7 +1570,7 @@ class Welcome(ttk.Frame):
             image=self.img0,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: container.show_frame(Signup),
+            command=lambda: container.show_frame(Signup,None,None,None,None,None),
             relief="flat")
 
         b0.place(
@@ -1252,7 +1583,7 @@ class Welcome(ttk.Frame):
             image=self.img1,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: container.show_frame(Login),
+            command=lambda: container.show_frame(Login,None,None,None,None,None),
             relief="flat")
 
         b1.place(
@@ -1294,7 +1625,7 @@ class Contact(ttk.Frame):
             image=self.img0,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: container.show_frame(Home),
+            command=lambda: container.show_frame(Home,None,None,None,None,None),
             relief="flat")
 
         b0.place(
@@ -1307,7 +1638,7 @@ class Contact(ttk.Frame):
             image=self.img1,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: container.show_frame(Correct),
+            command=lambda: container.show_frame(Correct,None,None,None,None,None),
             relief="flat")
 
         b1.place(
@@ -1333,7 +1664,7 @@ class Contact(ttk.Frame):
             image=self.img3,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: container.show_frame(Generate),
+            command=lambda: container.show_frame(Generate,None,None,None,None,None),
             relief="flat")
 
         b3.place(
@@ -1455,7 +1786,6 @@ class Contact(ttk.Frame):
             text="adresse agadir agadir",
             fill="#000000",
             font=("AnonymousPro Regular", 13))
-
 
 root = Window()
 root.resizable(False, False)

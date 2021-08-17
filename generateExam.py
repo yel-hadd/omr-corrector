@@ -136,6 +136,9 @@ def SwitchArFiveChoices(argument):
     return switcher.get(argument)
 
 def loadAnswerSheet(questions, choices, lang):
+    print(lang)
+    print(type(choices))
+    sheet = str
     if lang == 'fr' or lang == 'en':
         if choices == 3:
             for x in r:
@@ -162,10 +165,11 @@ def loadAnswerSheet(questions, choices, lang):
             for x in r:
                 if questions == x:
                     sheet = SwitchArFiveChoices(x)
+    print(sheet)
     return sheet
 
 def count_stdnts(workbook):
-    wb = opxl.load_workbook(f'{workbook}')
+    wb = opxl.load_workbook(workbook)
     sh1 = wb['NotesCC']
     v = sh1['D57'].value
     number_of_students = 0
@@ -174,12 +178,12 @@ def count_stdnts(workbook):
         for x in cell:
             if x.value != None:
                 number_of_students += 1
-            else:
-                return number_of_students
+    wb.close()
+    return number_of_students
 
 def loadstdntinfo(workbook, number_of_students):
     global num, academie, level, semester, session, _class, direction, subject, school, teacher
-    wb = opxl.load_workbook(f'{workbook}')
+    wb = opxl.load_workbook(workbook)
     sh1 = wb['NotesCC']
     names = []
     massar_id = []
@@ -216,6 +220,7 @@ def loadstdntinfo(workbook, number_of_students):
         num = len(names)
         return ordinal_number, names, massar_id, _class, num
     else:
+        wb.close()
         return -1
 
 def genQR(order, questions, choices, names, massar_id, _class, num):
@@ -272,7 +277,7 @@ def merge(QR, sheet):
         sheet.save(fileName)
     return sheetFileName
 
-def gentQR(q, c):
+def gentQR(q, c, c1, c2, c3, nbrc):
     qr2 = qr.QRCode(
         version=3,
         error_correction=qr.constants.ERROR_CORRECT_H,
@@ -288,13 +293,14 @@ def gentQR(q, c):
     b = 0
     for x in range(0, 7):
         if v[x] == False:
-            b = 1
+            b = 1 #1
             g[x] = tl.transString(g[x], False)
 
     if b == 1:
-        data = f'{q},{c},{g[0]},{g[1]},{g[2]},{g[3]},{g[4]},{g[5]},{g[6]},{b}'
+        data = f'{q},{c},{g[0]},{g[1]},{g[2]},{g[3]},{g[4]},{g[5]},{g[6]},{g[7]},{b},{nbrc},{c1},{c2},{c3}'
+                          #[school, _class, teacher, subject, level, semester, direction, academie]
     else:
-        data = f'{q},{c},{g[0]},{g[1]},{g[2]},{g[3]},{g[4]},{g[5]},{g[6]}'
+        data = f'{q},{c},{g[0]},{g[1]},{g[2]},{g[3]},{g[4]},{g[5]},{g[6]},{g[7]},{b},{nbrc},{c1},{c2},{c3}'
     del v
     del g
     qr2.add_data(data, optimize=True)
@@ -403,11 +409,28 @@ def clean(qr, sheet, header_sheet):
     for x in header_sheet:
         os.remove(x)
 
-def generateExam(questions, choices, workbook, lang, rep):
+def load_chapters(guicstring):
+    try:
+        c = guicstring.split('*')
+    except:
+        chapters = None
+        return chapters
+    chapters = []
+
+    for element in c:
+        chapters.append(element)
+
+    return chapters
+
+
+    #ch1_title, ch1_questions, ch2_title, ch2_questions, ch3_title, ch3_questions, ch4_title, ch4_questions
+
+
+def generateExam(questions, choices, workbook, lang, rep, c1, c2, c3, nbrc):
     sheet = loadAnswerSheet(questions, choices, lang)
     number_of_students = count_stdnts(workbook)
-    order, names, massar_id, _class, num = loadstdntinfo(workbook, number_of_students)
-    gentQR(questions, choices)
+    order, names, massar_id, _class, num= loadstdntinfo(workbook, number_of_students)
+    gentQR(questions, choices, c1,c2,c3,nbrc)
     l = teacher_sheet(sheet)
     QR = genQR(order, questions, choices, names, massar_id, _class, num)
     imagelist = merge(QR, sheet)

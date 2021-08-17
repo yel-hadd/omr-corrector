@@ -299,6 +299,18 @@ def correctExam(imgx, ans, bareme,rep):
         score = []
         gradingType = 1  # 0==moderate 1==strict
 
+        chapter1 = {
+            "title": str,
+            "nbrq": int
+        }
+        chapter2 = {
+            "title": str,
+            "nbrq": int
+        }
+        chapter3 = {
+            "title": str,
+            "nbrq": int
+        }
 
 
 
@@ -341,8 +353,8 @@ def correctExam(imgx, ans, bareme,rep):
             wr.writerow(nfo)
     return 0
 
-Full, school, classe, teacher, subject, level, semester, direction, academie = genAns('t1.jpg')
-correctExam('./sh/sh0.png', Full, None, 'sh0.jpg')
+Full, school, classe, teacher, subject, level, semester, direction, academie = genAns('C:\Users\AUBHD\PycharmProjects\omr-correctorsh\\t1.jpg')
+correctExam('./sh/sh0.png', Full, None, 'C:\Users\AUBHD\PycharmProjects\omr-corrector\sh\\sh0.jpg')
 
 
 def genReport(imgf, csv):
