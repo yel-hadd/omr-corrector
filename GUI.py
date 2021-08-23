@@ -6,8 +6,7 @@ import main as m
 import auth
 import captcha
 import generateExam as gen
-from shutil import copyfile
-import random
+from report import gen_report as gr
 
 
 try:
@@ -1380,13 +1379,18 @@ class Correct(ttk.Frame):
 
         for image in self.students_sheet:
             try:
-                m.correctExam(image, ans, None, self.output_path, nbrc, chapt1, chapt2, chap3)
+                csv_path, sbr = m.correctExam(image, ans, None, self.output_path, nbrc, chapt1, chapt2, chap3)
             except:
                 pass
-        self.canvas.itemconfigure(self.nbox, text='')
+
+        # no_chapter(path, rep, 20, _class, semester, level, academie, direction, school, subject, teacher)
+        if csv_path != 5:
+            gr(csv_path, self.output_path, nbrc, sbr, cla, smstr, lvl, aca, dir, sch, sub, tea)
+
+        self.canvas.itemconfigure(self.nbox, text='tâche accomplie avec succès')
         self.canvas.update()
-        messagebox.showinfo(title='success',
-                            message='All sheets have been corrected successfully')
+        messagebox.showinfo(title='succès',
+                            message='tâche accomplie avec succès')
         return 0
 
     def __init__(self, container):

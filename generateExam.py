@@ -6,6 +6,7 @@ import arabic_reshaper
 import img2pdf
 import openpyxl as opxl
 import transliteration as tl
+import regex as re
 
 r = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
 
@@ -136,10 +137,8 @@ def SwitchArFiveChoices(argument):
     return switcher.get(argument)
 
 def loadAnswerSheet(questions, choices, lang):
-    print(lang)
-    print(type(choices))
     sheet = str
-    if lang == 'fr' or lang == 'en':
+    if lang == 'fr' or lang == 'en' or lang == 'francais' or lang == 'français':
         if choices == 3:
             for x in r:
                 if questions == x:
@@ -152,7 +151,7 @@ def loadAnswerSheet(questions, choices, lang):
             for x in r:
                 if questions == x:
                     sheet = SwitchFrFiveChoices(x)
-    elif lang == 'ar':
+    elif lang == 'ar' or lang == 'arabic' or lang == 'Arabe' or lang == 'arabe' or lang == 'العربية':
         if choices == 3:
             for x in r:
                 if questions == x:
@@ -165,7 +164,6 @@ def loadAnswerSheet(questions, choices, lang):
             for x in r:
                 if questions == x:
                     sheet = SwitchArFiveChoices(x)
-    print(sheet)
     return sheet
 
 def count_stdnts(workbook):
@@ -189,16 +187,15 @@ def loadstdntinfo(workbook, number_of_students):
     massar_id = []
     ordinal_number = []
 
-    _class = sh1['I9'].value  # extraire le nom du classe
-    academie = sh1['D7'].value  # extraire le nom de l'académie
-    level = sh1['D9'].value  # extraire le niveau scolaire
-    semester = sh1['D11'].value  # extraire la semester (1 ou 2)
-    session = sh1['D13'].value  # extraire la session
-    _class = sh1['I9'].value  # extraire le nom de classe
-    direction = sh1['I7'].value  # extraire le nom de direction
-    subject = sh1['O11'].value  # extraire le sujet
-    school = sh1['O7'].value  # extraire le nom de l'école
-    teacher = sh1['O9'].value  # extraire le nom de l'enseignant
+    _class = re.sub(r'\W+', ' ', sh1['I9'].value)  # extraire le nom du classe
+    academie = re.sub(r'\W+', ' ', sh1['D7'].value) # extraire le nom de l'académie
+    level = re.sub(r'\W+', ' ', sh1['D9'].value)  # extraire le niveau scolaire
+    semester = re.sub(r'\W+', ' ', sh1['D11'].value)  # extraire la semester (1 ou 2)
+    session = re.sub(r'\W+', ' ', sh1['D13'].value)  # extraire la session
+    direction = re.sub(r'\W+', ' ', sh1['I7'].value)  # extraire le nom de direction
+    subject = re.sub(r'\W+', ' ', sh1['O11'].value)  # extraire le sujet
+    school = re.sub(r'\W+', ' ', sh1['O7'].value)  # extraire le nom de l'école
+    teacher = re.sub(r'\W+', ' ', sh1['O9'].value)  # extraire le nom de l'enseignant
 
     # extraire les noms des etudiants
     names_column = sh1['D18':f'D{18 + number_of_students - 1}']
@@ -287,7 +284,7 @@ def gentQR(q, c, c1, c2, c3, nbrc):
     g = [school, _class, teacher, subject, level, semester, direction, academie]
     v = []
     for y in g:
-        y = y.translate({ord(c): " " for c in "!@#$%^&*()[]{};:,./<>?\|`~-=_+"})
+        #y = y.translate({ord(c): " " for c in "!@#$%^&*()[]{};:,./<>?\|`~-=_+"})
         v.append(tl.only_roman_chars(y))
 
     b = 0
@@ -362,15 +359,15 @@ def add_header_text(sheetFileName, names, order):
         levelh = arabic_reshaper.reshape(levelh)
         levelh = get_display(levelh)
 
-        academieh = academie.replace("-", "")
+        academieh = academie
         academieh = arabic_reshaper.reshape(academieh)
         academieh = get_display(academieh)
 
-        directionh = direction.replace(":", "")
+        directionh = direction
         directionh = arabic_reshaper.reshape(directionh)
         directionh = get_display(directionh)
 
-        schoolh = school.replace(".", " ")
+        schoolh = school
         schoolh = arabic_reshaper.reshape(schoolh)
         schoolh = get_display(schoolh)
 

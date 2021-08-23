@@ -156,7 +156,6 @@ def genAns(imga):
             if countC == choices:
                 countR += 1
                 countC = 0
-        cv2.imwrite('X.jpg', imgBiggestContours)
         return Full, school, classe, teacher, subject, level, semester, direction, academie, nbr, ch1, ch2, ch3
     else:
         return 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -171,7 +170,7 @@ def correctExam(imgx, ans, bareme, rep, nbrc, ch1, ch2, ch3):
         del ss
         values = decode(Image.open(imgx))
         if len(values) < 1:
-            return 1
+            return 5
         values = values[0].data
         values = codecs.decode(values)
         split = values.split(',')
@@ -403,7 +402,10 @@ def correctExam(imgx, ans, bareme, rep, nbrc, ch1, ch2, ch3):
                 else:
                     wr.writerow(headers)
                     wr.writerow(nfo)
-            return 0
+
+            s_bareme = sum(bareme)
+
+            return path, s_bareme
 
         elif nchapters == 2:
             m1 = ch1.split(':')
@@ -451,7 +453,10 @@ def correctExam(imgx, ans, bareme, rep, nbrc, ch1, ch2, ch3):
                 else:
                     wr.writerow(headers)
                     wr.writerow(nfo)
-            return 0
+
+            s_bareme = sum(bareme)
+
+            return path, s_bareme
 
         elif nchapters == 3:
             m1 = ch1.split(':')
@@ -506,7 +511,10 @@ def correctExam(imgx, ans, bareme, rep, nbrc, ch1, ch2, ch3):
                 else:
                     wr.writerow(headers)
                     wr.writerow(nfo)
-            return 0
+
+            s_bareme = sum(bareme)
+
+            return path, s_bareme
 
         elif nchapters == 0:
             nfo.append(sumscore)
@@ -522,6 +530,9 @@ def correctExam(imgx, ans, bareme, rep, nbrc, ch1, ch2, ch3):
             with open(path, "a", encoding="utf-8", newline='\n') as fp:
                 wr = csv.writer(fp, dialect='excel')
                 wr.writerow(nfo)
-            return 0
+
+            s_bareme = sum(bareme)
+
+            return path, s_bareme
     else:
-        return 1
+        return 5
