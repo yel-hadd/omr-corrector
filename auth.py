@@ -1,6 +1,16 @@
 import pyrebase
 import re
-import captcha
+from urllib.request import urlopen
+import random
+import csv
+
+
+def internet_on():
+    try:
+        response = urlopen('https://www.google.com/', timeout=10)
+        return True
+    except:
+        return False
 
 regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
 
@@ -15,12 +25,14 @@ firebaseConfig = {
   'databaseURL': None
 }
 
-
 firebase=pyrebase.initialize_app(firebaseConfig)
 auth=firebase.auth()
 
-
 def login(email, password):
+    g = internet_on()
+    if g == False:
+        return 3
+
     if not(re.match(regex, email)):
         return 0
     # "Invalid Email Address"
@@ -35,6 +47,9 @@ def login(email, password):
 #Signup Function
 
 def signup(email, password):
+    g = internet_on()
+    if g == False:
+        return 3
     if not(re.match(regex, email)):
         return 0
         #"Invalid Email Address"
@@ -47,6 +62,10 @@ def signup(email, password):
         #"Email already exists"
 
 def reset_password(email):
+    g = internet_on()
+    if g == False:
+        return 3
+
     if not(re.match(regex, email)):
         return 0
         #"Invalid Email Address"

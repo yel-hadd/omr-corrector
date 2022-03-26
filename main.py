@@ -9,6 +9,7 @@ from PIL import Image
 import transliteration as tl
 import codecs
 
+
 # why not thread windows
 def genAns(imga):
     img = cv2.imread(imga)
@@ -146,7 +147,7 @@ def genAns(imga):
         for image in boxes:
             totalPixel = cv2.countNonZero(image)
             myPixelVal[countR][countC] = totalPixel
-            if myPixelVal[countR][countC] < image.shape[0] * image.shape[1] * 30 / 100: # 30%
+            if myPixelVal[countR][countC] < image.shape[0] * image.shape[1] * 40 / 100: # 30%
                 empty[countR][countC] = 1
                 Full[countR][countC] = 0
             else:
@@ -305,10 +306,6 @@ def correctExam(imgx, ans, bareme, rep, nbrc, ch1, ch2, ch3):
         matrixG = cv2.getPerspectiveTransform(ptg1, ptg2)
         imgGradeDisplay = cv2.warpPerspective(img, matrixG, (325, 150))
 
-        ptq1 = np.float32(qrPoints)
-        ptq2 = np.float32([[0, 0], [500, 0], [0, 500], [500, 500]])
-        matrixG = cv2.getPerspectiveTransform(ptq1, ptq2)
-        imgQrDisplay = cv2.warpPerspective(img, matrixG, (500, 500))
 
         # apply threshold
         imgWarpGray = cv2.cvtColor(imgWarpColored, cv2.COLOR_BGR2GRAY)
@@ -325,7 +322,7 @@ def correctExam(imgx, ans, bareme, rep, nbrc, ch1, ch2, ch3):
         for image in boxes:
             totalPixel = cv2.countNonZero(image)
             myPixelVal[countR][countC] = totalPixel
-            if myPixelVal[countR][countC] < image.shape[0] * image.shape[1] * 30 / 100:  # 30%
+            if myPixelVal[countR][countC] < image.shape[0] * image.shape[1] * 40 / 100:  # 30%
                 empty[countR][countC] = 1
                 Full[countR][countC] = 0
             else:

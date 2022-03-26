@@ -7,6 +7,8 @@ import img2pdf
 import openpyxl as opxl
 import transliteration as tl
 import regex as re
+from datetime import datetime
+
 
 r = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
 
@@ -224,7 +226,6 @@ def genQR(order, questions, choices, names, massar_id, _class, num):
     qrFilename = []
     for x in range(0, num):
         qr1 = qr.QRCode(
-            version=3,
             error_correction=qr.constants.ERROR_CORRECT_H,
             box_size=40,
             border=4,
@@ -276,7 +277,6 @@ def merge(QR, sheet):
 
 def gentQR(q, c, c1, c2, c3, nbrc):
     qr2 = qr.QRCode(
-        version=3,
         error_correction=qr.constants.ERROR_CORRECT_H,
         box_size=40,
         border=4,
@@ -394,7 +394,9 @@ def add_header_text(sheetFileName, names, order):
     return list
 
 def genPDF(sheetFileName, rep):
-    filename = f"{rep}/Exam.pdf"
+    today = datetime.now()
+    today = today.strftime("%d%m%Y")
+    filename = f"{rep}/Exam_{_class}_{today}.pdf"
     with open(filename, "wb") as f:
         f.write(img2pdf.convert(sheetFileName))
 
@@ -422,7 +424,6 @@ def load_chapters(guicstring):
 
     #ch1_title, ch1_questions, ch2_title, ch2_questions, ch3_title, ch3_questions, ch4_title, ch4_questions
 
-
 def generateExam(questions, choices, workbook, lang, rep, c1, c2, c3, nbrc):
     sheet = loadAnswerSheet(questions, choices, lang)
     number_of_students = count_stdnts(workbook)
@@ -434,4 +435,4 @@ def generateExam(questions, choices, workbook, lang, rep, c1, c2, c3, nbrc):
     imagelist2 = add_header_text(imagelist, names, order)
     imagelist2.insert(0, l)
     genPDF(imagelist2, rep)
-    #clean(QR, imagelist2, imagelist)
+    clean(QR, imagelist2, imagelist)
