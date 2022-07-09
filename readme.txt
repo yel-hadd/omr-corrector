@@ -1,7 +1,8 @@
 Created by yassine el haddad,
 All rights are reserved.
 
-feel free to contact me at:
+An automatic MCQ exam generator and grader.
 
-0600000000
-yassine.e@aol.com
+Created Using Python, Opencv, Numpy, Pandas and Matplotlib.
+
+This software uses Firebase for authentication and Tkinter for the GUI.
