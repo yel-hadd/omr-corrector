@@ -29,10 +29,9 @@ python3 vipgrader.py
 ![Mockup2](https://user-images.githubusercontent.com/82560247/178168299-5d787488-54ce-41f4-a3ff-7507bbda7b8c.jpg)
 ## Program Preview
 #### how to grade exam using vip grader
-https://user-images.githubusercontent.com/82560247/178171096-497be734-34f9-4712-9d70-727f5b47e203.mp4
-
-
-
+https://user-images.githubusercontent.com/82560247/178171552-76e359bc-d28f-4e4b-89ed-5ba4eefb686a.mp4
+#### how to generate exam sheets
+https://user-images.githubusercontent.com/82560247/178171532-43387ede-8e2e-40ee-be04-8ca7f1baeebe.mp4
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
