@@ -8,10 +8,8 @@ This software uses Firebase for authentication and Tkinter for the GUI.
 
 the main goal is to make the grading process easier for teachers and save them time for the things that matter, while giving them an insight into the students performance.
 
-This software facilitates the task of grading exams; this process
-will take seconds to process hundreds of exams whereas a traditional correction will take hours and even days.
-
-Apart from its efficiency, this software guarantees a perfect correction.
+This software facilitates the task of grading exams
+this process will take a few seconds to process hundreds of exams whereas traditional grading will take hours and even days.
 
 The software also generates a detailed report that describes the
 class statistics with charts and key figures.
@@ -24,7 +22,10 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) to install the req
 pip install -r requirements.txt
 python3 vipgrader.py
 ```
+## Output Sample
+
 ## Screenshots
+
 
 
 ## Contributing
